@@ -2,8 +2,9 @@
 
 Install dependencies
 
-`pip install -r requirements.txt`
+`pip install poetry`
+`make setup`
 
 Run the project
 
-`hypercorn main:app --reload`
+`make run`
