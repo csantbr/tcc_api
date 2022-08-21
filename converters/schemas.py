@@ -11,7 +11,9 @@ def convert_schema_to_model(schema: Any) -> Any:
 
         model.name = schema.name
         model.description = schema.description
+        model.entry_description = schema.entry_description
         model.data_entry = schema.data_entry
+        model.output_description = schema.output_description
         model.data_output = schema.data_output
     elif isinstance(schema, Submission):
         model = SubmissionModel()
@@ -28,7 +30,9 @@ def set_schema_to_model(schema: Any, model: Any) -> Any:
     if isinstance(schema, Problem):
         model.name = schema.name
         model.description = schema.description
+        model.entry_description = schema.entry_description
         model.data_entry = schema.data_entry
+        model.output_description = schema.output_description
         model.data_output = schema.data_output
     elif isinstance(schema, Submission):
         model.problem_id = schema.problem_id
