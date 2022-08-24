@@ -1,37 +1,40 @@
-import sqlite3
 import subprocess
 import tempfile
+import base64
+from sqlalchemy.orm import Session
+from crud import create
 from difflib import SequenceMatcher
+from typing import TypeVar
+from converters.schemas import convert_schema_to_model
+from routers.controllers.problem import get_problem
 
 
-def get_ratio(expected_response, response):
-    return 100 - SequenceMatcher(None, expected_response, response).ratio() * 100
+async def judge_submission(db: Session, schema: TypeVar('TSchema')) -> None:
+    query = convert_schema_to_model(schema=schema)
+
+    problem = await get_problem(id=schema.problem_id, db=db)
+
+    if schema.language_type == 'python':
+        response = await run_python(schema.content, problem.data_entry)
+    elif schema.language_type == 'c':
+        response = await run_c(schema.content, problem.data_entry)
+    elif schema.language_type == 'cpp':
+        response = await run_cpp(schema.content, problem.data_entry)
+    else:
+        print('Invalid language type')
+        pass
+
+    schema.status = judge(response=response, expected_output=problem.data_output)
+    query = convert_schema_to_model(schema=schema)
+
+    db.add(query)
+    db.commit()
 
 
-def init_db(index, language, code, expected_input, expected_output, delete=False):
-    conn = sqlite3.connect('teste.db')
-    cursor = conn.cursor()
-    cursor.execute('CREATE TABLE IF NOT EXISTS teste (id int, language text, code text, input text, output text)')
-    if delete:
-        cursor.execute('DELETE FROM teste')
-    cursor.execute(
-        'INSERT INTO teste VALUES (?, ?, ?, ?, ?)',
-        (index, language, code, expected_input, expected_output),
-    )
-    conn.commit()
-
-
-def get_from_db(id):
-    conn = sqlite3.connect('teste.db')
-    cursor = conn.cursor()
-    cursor.execute(f'SELECT code, input, output FROM teste WHERE id = {id}')
-    data = cursor.fetchall()[0]
-    return data[0], data[1], data[2]
-
-
-def run_python(code, data_input):
+async def run_python(content, data_input):
+    code = base64.b64decode(content)
     with tempfile.NamedTemporaryFile() as tmp:
-        tmp.write(code.encode())
+        tmp.write(code)
         tmp.file.seek(0)
         pipe = subprocess.Popen(
             f'python {tmp.name}',
@@ -42,9 +45,10 @@ def run_python(code, data_input):
         return pipe.communicate(data_input.encode(), timeout=5000)
 
 
-def run_c(code, data_input):
+async def run_c(code, data_input):
+    code = base64.b64decode(content)
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
-        tmp.write(code.encode())
+        tmp.write(code)
         tmp.file.seek(0)
         pipe = subprocess.Popen(
             f'gcc -lm -o {tmp.name}_ {tmp.name} && {tmp.name}_ && rm {tmp.name}_',
@@ -55,9 +59,10 @@ def run_c(code, data_input):
         return pipe.communicate(data_input.encode(), timeout=5000)
 
 
-def run_cpp(code, data_input):
+async def run_cpp(code, data_input):
+    code = base64.b64decode(content)
     with tempfile.NamedTemporaryFile(suffix='.cpp') as tmp:
-        tmp.write(code.encode())
+        tmp.write(code)
         tmp.file.seek(0)
         pipe = subprocess.Popen(
             f'g++ -lm -o {tmp.name}_ {tmp.name} && {tmp.name}_ && rm {tmp.name}_',
@@ -68,89 +73,21 @@ def run_cpp(code, data_input):
         return pipe.communicate(data_input.encode(), timeout=5000)
 
 
-def judge(obj: dict):
-    if obj[1]:
-        print('COMPILATION ERROR')
-    elif obj[0] and (obj[0].decode().count('\n') != expected_response.count('\n') or response[0].decode()[-1] != '\n'):
-        print('PRESENTATION ERROR')
+def get_ratio(expected_response, response):
+    return 100 - SequenceMatcher(None, expected_response, response).ratio() * 100
+
+
+def judge(response: dict, expected_output: str):
+    if response[1]:
+       return 'COMPILATION ERROR'
+    elif response[0] and (response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n'):
+       return 'PRESENTATION ERROR'
     else:
-        obj = obj[0].decode()
-        ratio = get_ratio(expected_response.replace('\n', ''), obj.replace('\n', ''))
+        response = response[0].decode()
+        ratio = get_ratio(expected_output.replace('\n', ''), response.replace('\n', ''))
         if ratio == 0:
-            print('ACCEPTED')
+            return 'ACCEPTED'
         else:
             count = (ratio - (ratio % 5)) or 5
-            print(f'WRONG ANSWER: {count:.0f}%')
+            return f'WRONG ANSWER: {count:.0f}%'
 
-
-def initial():
-    code_in_python = """
-def add(x, y):
-    return x + y
-x, y = map(int, input().split(' '))
-print(add(x, y))
-    """
-
-    code_in_c = """
-    #include <stdio.h>
-    int main() {
-        int a, b;
-        scanf("%d %d", &a, &b);
-        printf("%d\\n", a + b);
-        return 0;
-    }
-    """
-
-    code_in_cpp = """
-    #include <iostream>
-
-    int main() {
-        int a, b;
-        std::cin >> a >> b;
-        std::cout << std::to_string(a+b) + "\\n";
-        return 0;
-    }
-    """
-
-    request_input_to_db = '20 5'
-    expected_response_to_db = '25\n'
-
-    init_db(
-        1,
-        'python',
-        code_in_python,
-        request_input_to_db,
-        expected_response_to_db,
-        delete=False,
-    )
-    init_db(
-        2,
-        'c',
-        code_in_c,
-        request_input_to_db,
-        expected_response_to_db,
-        delete=False,
-    )
-    init_db(
-        3,
-        'cpp',
-        code_in_cpp,
-        request_input_to_db,
-        expected_response_to_db,
-        delete=False,
-    )
-
-
-initial()
-code_py, request_input, expected_response = get_from_db(1)
-code_c, request_input, expected_response = get_from_db(2)
-code_cpp, request_input, expected_response = get_from_db(3)
-
-response = run_python(code_py, request_input)
-judge(response)
-
-response = run_c(code_c, request_input)
-judge(response)
-
-response = run_cpp(code_cpp, request_input)
-judge(response)
