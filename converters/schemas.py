@@ -5,7 +5,7 @@ from schemas.problem import Problem
 from typing import Any
 
 
-def convert_schema_to_model(schema: Any) -> Any:
+def convert_schema_to_model(schema: Any, field=None) -> Any:
     if isinstance(schema, Problem):
         model = ProblemModel()
 
@@ -21,7 +21,9 @@ def convert_schema_to_model(schema: Any) -> Any:
         model.problem_id = schema.problem_id
         model.language_type = schema.language_type
         model.content = schema.content
-        model.status = schema.status
+        model.status = ''
+        if field:
+            model.status = field
 
     return model
 
@@ -38,6 +40,6 @@ def set_schema_to_model(schema: Any, model: Any) -> Any:
         model.problem_id = schema.problem_id
         model.language_type = schema.language_type
         model.content = schema.content
-        model.status = schema.status
+        model.status = ''
 
     return model
