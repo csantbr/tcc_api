@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 class Problem(Base):
     __tablename__ = 'problems'
 
-    id: UUID = Column(PG_UUID(as_uuid=True), default=uuid4(), primary_key=True, index=True)
+    id: UUID = Column(PG_UUID(as_uuid=True), default=uuid4, primary_key=True, index=True)
     name = Column(String, index=True, unique=True)
     description = Column(String)
     data_entry = Column(String, nullable=True)
