@@ -45,7 +45,11 @@ async def run_python(content, data_input):
             stdout=subprocess.PIPE,
             shell=True,
         )
-        return pipe.communicate(data_input.encode(), timeout=5000)
+        try:
+            return pipe.communicate(data_input.encode(), timeout=35)
+        except subprocess.TimeoutExpired:
+            pipe.kill()
+            return 'TLE'
 
 
 async def run_c(content, data_input):
@@ -59,7 +63,11 @@ async def run_c(content, data_input):
             stdout=subprocess.PIPE,
             shell=True,
         )
-        return pipe.communicate(data_input.encode(), timeout=5000)
+        try:
+            return pipe.communicate(data_input.encode(), timeout=35)
+        except subprocess.TimeoutExpired:
+            pipe.kill()
+            return 'TLE'
 
 
 async def run_cpp(content, data_input):
@@ -73,15 +81,21 @@ async def run_cpp(content, data_input):
             stdout=subprocess.PIPE,
             shell=True,
         )
-        return pipe.communicate(data_input.encode(), timeout=5000)
+        try:
+            return pipe.communicate(data_input.encode(), timeout=35)
+        except subprocess.TimeoutExpired:
+            pipe.kill()
+            return 'TLE'
 
 
 def get_ratio(expected_response, response):
     return 100 - SequenceMatcher(None, expected_response, response).ratio() * 100
 
 
-def judge(response: dict, expected_output: str):
-    if response[1]:
+def judge(response, expected_output: str):
+    if response == 'TLE':
+        return 'TIME LIMIT EXCEEDED'
+    elif not response[0].decode():
         return 'COMPILATION ERROR'
     elif response[0] and (
         response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n'
