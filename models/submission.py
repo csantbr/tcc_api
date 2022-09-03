@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 class Submission(Base):
     __tablename__ = 'submissions'
 
-    id: UUID = Column(PG_UUID(as_uuid=True), default=uuid4(), primary_key=True, index=True)
+    id: UUID = Column(PG_UUID(as_uuid=True), default=uuid4, primary_key=True, index=True)
     problem_id: UUID = Column(PG_UUID(as_uuid=True), ForeignKey('problems.id'), nullable=False)
     language_type: str = Column(String, nullable=False)
     content: str = Column(String, nullable=False)
@@ -15,6 +15,3 @@ class Submission(Base):
 
     def __repr__(self):
         return f'<Submission {self.id}>'
-
-    def __str__(self):
-        return self.name

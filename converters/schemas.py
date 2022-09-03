@@ -5,7 +5,7 @@ from schemas.problem import Problem
 from typing import Any
 
 
-def convert_schema_to_model(schema: Any, field=None) -> Any:
+def convert_schema_to_model(schema: Any) -> Any:
     if isinstance(schema, Problem):
         model = ProblemModel()
 
@@ -21,9 +21,7 @@ def convert_schema_to_model(schema: Any, field=None) -> Any:
         model.problem_id = schema.problem_id
         model.language_type = schema.language_type
         model.content = schema.content
-        model.status = ''
-        if field:
-            model.status = field
+        model.status = 'pending'
 
     return model
 

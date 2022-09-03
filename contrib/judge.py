@@ -1,26 +1,21 @@
 import subprocess
 import tempfile
 import base64
-from sqlalchemy.orm import Session
-from crud import create
+from uuid import UUID
 from difflib import SequenceMatcher
 from typing import TypeVar
 from converters.schemas import convert_schema_to_model
-from routers.controllers.problem import get_problem
+from routers.controllers.submission import update_submission
 from contrib.exceptions import LanguageNotImplemented, UnprocessableEntity
 
 
-async def judge_submission(db: Session, schema: TypeVar('TSchema')):
-    query = convert_schema_to_model(schema=schema)
-
-    problem = await get_problem(id=schema.problem_id, db=db)
-
+def judge_submission(id: UUID, problem_id: UUID, schema: TypeVar('TSchema')):
     if schema.language_type == 'python':
-        response = await run_python(schema.content, problem.data_entry)
+        response = run_python(schema.content, problem.data_entry)
     elif schema.language_type == 'c':
-        response = await run_c(schema.content, problem.data_entry)
+        response = run_c(schema.content, problem.data_entry)
     elif schema.language_type == 'cpp':
-        response = await run_cpp(schema.content, problem.data_entry)
+        response = run_cpp(schema.content, problem.data_entry)
     else:
         raise LanguageNotImplemented
 
@@ -30,11 +25,10 @@ async def judge_submission(db: Session, schema: TypeVar('TSchema')):
     field = judge(response=response, expected_output=problem.data_output)
     query = convert_schema_to_model(schema=schema, field=field)
 
-    db.add(query)
-    db.commit()
 
 
-async def run_python(content, data_input):
+
+def run_python(content, data_input):
     code = base64.b64decode(content)
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(code)
@@ -45,10 +39,14 @@ async def run_python(content, data_input):
             stdout=subprocess.PIPE,
             shell=True,
         )
-        return pipe.communicate(data_input.encode(), timeout=5000)
+        try:
+            return pipe.communicate(data_input.encode(), timeout=35)
+        except subprocess.TimeoutExpired:
+            pipe.kill()
+            return 'TLE'
 
 
-async def run_c(content, data_input):
+def run_c(content, data_input):
     code = base64.b64decode(content)
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
         tmp.write(code)
@@ -59,10 +57,14 @@ async def run_c(content, data_input):
             stdout=subprocess.PIPE,
             shell=True,
         )
-        return pipe.communicate(data_input.encode(), timeout=5000)
+        try:
+            return pipe.communicate(data_input.encode(), timeout=35)
+        except subprocess.TimeoutExpired:
+            pipe.kill()
+            return 'TLE'
 
 
-async def run_cpp(content, data_input):
+def run_cpp(content, data_input):
     code = base64.b64decode(content)
     with tempfile.NamedTemporaryFile(suffix='.cpp') as tmp:
         tmp.write(code)
@@ -73,15 +75,21 @@ async def run_cpp(content, data_input):
             stdout=subprocess.PIPE,
             shell=True,
         )
-        return pipe.communicate(data_input.encode(), timeout=5000)
+        try:
+            return pipe.communicate(data_input.encode(), timeout=35)
+        except subprocess.TimeoutExpired:
+            pipe.kill()
+            return 'TLE'
 
 
 def get_ratio(expected_response, response):
     return 100 - SequenceMatcher(None, expected_response, response).ratio() * 100
 
 
-def judge(response: dict, expected_output: str):
-    if response[1]:
+def judge(response, expected_output: str):
+    if response == 'TLE':
+        return 'TIME LIMIT EXCEEDED'
+    elif not response[0].decode():
         return 'COMPILATION ERROR'
     elif response[0] and (
         response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n'
