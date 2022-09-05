@@ -1,41 +1,49 @@
+import base64
+import binascii
 import subprocess
 import tempfile
-import base64
-from sqlalchemy.orm import Session
-from crud import create
 from difflib import SequenceMatcher
 from typing import TypeVar
+from uuid import UUID
+
+from sqlalchemy import update
+from sqlalchemy.orm import Session
+
+from contrib import exceptions
 from converters.schemas import convert_schema_to_model
-from routers.controllers.problem import get_problem
-from contrib.exceptions import LanguageNotImplemented, UnprocessableEntity
+from models.submission import Submission
 
 
-async def judge_submission(db: Session, schema: TypeVar('TSchema')):
-    query = convert_schema_to_model(schema=schema)
+def base64_decode(content):
+    try:
+        code = base64.b64decode(content)
+    except binascii.Error:
+        raise exceptions.InvalidBase64
 
-    problem = await get_problem(id=schema.problem_id, db=db)
+    return code
 
-    if schema.language_type == 'python':
-        response = await run_python(schema.content, problem.data_entry)
+
+def judge_submission(id: UUID, collection: dict, schema: TypeVar('TSchema'), db: Session):
+    if schema.language_type == 'py':
+        response = run_python(schema.content, collection.data_entry)
     elif schema.language_type == 'c':
-        response = await run_c(schema.content, problem.data_entry)
+        response = run_c(schema.content, collection.data_entry)
     elif schema.language_type == 'cpp':
-        response = await run_cpp(schema.content, problem.data_entry)
+        response = run_cpp(schema.content, collection.data_entry)
     else:
-        raise LanguageNotImplemented
+        raise exceptions.InvalidLanguageType
 
     if not schema.content:
-        raise UnprocessableEntity
+        raise exceptions.InvalidBase64
 
-    field = judge(response=response, expected_output=problem.data_output)
-    query = convert_schema_to_model(schema=schema, field=field)
+    status = judge(response=response, expected_output=collection.data_output)
 
-    db.add(query)
+    db.query(Submission).filter(Submission.id == id).update({'status': status})
     db.commit()
 
 
-async def run_python(content, data_input):
-    code = base64.b64decode(content)
+def run_python(content, data_input):
+    code = base64_decode(content)
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -46,14 +54,14 @@ async def run_python(content, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=35)
+            return pipe.communicate(data_input.encode(), timeout=30)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
 
 
-async def run_c(content, data_input):
-    code = base64.b64decode(content)
+def run_c(content, data_input):
+    code = base64_decode(content)
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -64,14 +72,14 @@ async def run_c(content, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=35)
+            return pipe.communicate(data_input.encode(), timeout=30)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
 
 
-async def run_cpp(content, data_input):
-    code = base64.b64decode(content)
+def run_cpp(content, data_input):
+    code = base64_decode(content)
     with tempfile.NamedTemporaryFile(suffix='.cpp') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -82,7 +90,7 @@ async def run_cpp(content, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=35)
+            return pipe.communicate(data_input.encode(), timeout=30)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'

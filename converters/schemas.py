@@ -1,11 +1,12 @@
-from models.submission import Submission as SubmissionModel
-from models.problem import Problem as ProblemModel
-from schemas.submission import Submission
-from schemas.problem import Problem
 from typing import Any
 
+from models.problem import Problem as ProblemModel
+from models.submission import Submission as SubmissionModel
+from schemas.problem import Problem
+from schemas.submission import Submission
 
-def convert_schema_to_model(schema: Any, field=None) -> Any:
+
+def convert_schema_to_model(schema: Any) -> Any:
     if isinstance(schema, Problem):
         model = ProblemModel()
 
@@ -21,9 +22,7 @@ def convert_schema_to_model(schema: Any, field=None) -> Any:
         model.problem_id = schema.problem_id
         model.language_type = schema.language_type
         model.content = schema.content
-        model.status = ''
-        if field:
-            model.status = field
+        model.status = 'PENDING'
 
     return model
 

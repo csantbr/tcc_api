@@ -1,7 +1,9 @@
-from database.session import Base
+from uuid import UUID, uuid4
+
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from uuid import UUID, uuid4
+
+from database.session import Base
 
 
 class Submission(Base):
@@ -15,6 +17,3 @@ class Submission(Base):
 
     def __repr__(self):
         return f'<Submission {self.id}>'
-
-    def __str__(self):
-        return self.name

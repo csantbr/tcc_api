@@ -5,3 +5,9 @@ setup:
 
 run:
 	hypercorn main:app --reload
+
+lint:
+	blue .
+
+sort:
+	isort .

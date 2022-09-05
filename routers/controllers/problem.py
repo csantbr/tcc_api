@@ -1,10 +1,12 @@
-from fastapi import APIRouter, status, Depends
-from database.session import Base, engine, get_database
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
+
+from crud import create, delete, get, update
+from database.session import Base, engine, get_database
 from models.problem import Problem as ProblemModel
 from schemas.problem import Problem
-from crud import get, create, delete, update
-from uuid import UUID
 
 Base.metadata.create_all(bind=engine)
 

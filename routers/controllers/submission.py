@@ -1,12 +1,17 @@
-from database.session import Base
-from fastapi import APIRouter, Body, status, Depends, Form
-from database.session import engine, get_database
-from sqlalchemy.orm import Session
-from models.submission import Submission as SubmissionModel
-from schemas.submission import Submission
-from crud import get, delete, update
 from uuid import UUID
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi.exceptions import HTTPException, RequestValidationError
+from pydantic.error_wrappers import ErrorWrapper
+from sqlalchemy.orm import Session
+
+from contrib.exceptions import InvalidBase64
 from contrib.judge import judge_submission
+from crud import create, delete, get, update
+from database.session import Base, engine, get_database
+from models.submission import Submission as SubmissionModel
+from routers.controllers.problem import get_problem
+from schemas.submission import Submission
 
 Base.metadata.create_all(bind=engine)
 
@@ -28,8 +33,13 @@ async def get_submission(id: UUID, db: Session = Depends(get_database)):
 
 
 @submission_router.post('/submissions', status_code=status.HTTP_201_CREATED, tags=['submissions'])
-async def create_submission(submission: Submission, db: Session = Depends(get_database)):
-    await judge_submission(db=db, schema=submission)
+async def create_submission(
+    submission: Submission, background_tasks: BackgroundTasks, db: Session = Depends(get_database)
+):
+    submission_obj = await create(db=db, schema=submission)
+    problem_obj = await get_problem(id=submission.problem_id, db=db)
+
+    background_tasks.add_task(judge_submission, id=submission_obj.id, collection=problem_obj, schema=submission, db=db)
 
     return submission
 

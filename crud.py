@@ -1,8 +1,9 @@
+from typing import Any, List, TypeVar
+
 from sqlalchemy.orm import Session
-from typing import TypeVar, List, Any
+
 from contrib.exceptions import NotFoundException
 from converters.schemas import convert_schema_to_model, set_schema_to_model
-
 
 TModel = TypeVar('TModel')
 TSchema = TypeVar('TSchema')
@@ -20,11 +21,13 @@ async def get(db: Session, model: TModel, id: Any = None) -> List[TModel]:
     return query
 
 
-async def create(db: Session, schema: TSchema) -> None:
+async def create(db: Session, schema: TSchema):
     query = convert_schema_to_model(schema=schema)
 
     db.add(query)
     db.commit()
+
+    return query
 
 
 async def update(db: Session, model: TModel, schema: TSchema, id: Any = None) -> None:
