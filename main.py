@@ -1,9 +1,9 @@
-from database.session import Base
 from fastapi import FastAPI, status
-from database.session import engine
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
-from routers.api import router
 
+from database.session import Base, engine
+from routers.api import router
 
 tags_metadata = [
     {
@@ -18,6 +18,19 @@ tags_metadata = [
 
 
 app = FastAPI(openapi_tags=tags_metadata, title='Judge')
+
+origins = [
+    'http://localhost',
+    'http://localhost:8000',
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 @app.get('/', include_in_schema=False)

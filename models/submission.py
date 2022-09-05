@@ -1,7 +1,9 @@
-from database.session import Base
+from uuid import UUID, uuid4
+
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from uuid import UUID, uuid4
+
+from database.session import Base
 
 
 class Submission(Base):

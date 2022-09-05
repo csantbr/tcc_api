@@ -1,4 +1,4 @@
-from fastapi import status, HTTPException
+from fastapi import HTTPException, status
 
 
 class UnauthorizedException(HTTPException):
@@ -16,11 +16,11 @@ class NotFoundException(HTTPException):
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
-class LanguageNotImplemented(HTTPException):
-    def __init__(self, detail='language judge not implemented'):
-        super().__init__(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=detail)
+class InvalidLanguageType(HTTPException):
+    def __init__(self, detail='invalid language type on language type field'):
+        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
 
 
-class UnprocessableEntity(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+class InvalidBase64(HTTPException):
+    def __init__(self, detail='invalid base64 encode on content field'):
+        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
