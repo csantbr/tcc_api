@@ -14,27 +14,13 @@ from converters.schemas import convert_schema_to_model
 from models.submission import Submission
 
 
-def base64_decode(content):
-    try:
-        code = base64.b64decode(content)
-    except binascii.Error:
-        raise exceptions.InvalidBase64
-
-    return code
-
-
-def judge_submission(id: UUID, collection: dict, schema: TypeVar('TSchema'), db: Session):
+def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('TSchema'), db: Session):
     if schema.language_type == 'py':
-        response = run_python(schema.content, collection.data_entry)
+        response = run_python(code, collection.data_entry)
     elif schema.language_type == 'c':
-        response = run_c(schema.content, collection.data_entry)
+        response = run_c(code, collection.data_entry)
     elif schema.language_type == 'cpp':
-        response = run_cpp(schema.content, collection.data_entry)
-    else:
-        raise exceptions.InvalidLanguageType
-
-    if not schema.content:
-        raise exceptions.InvalidBase64
+        response = run_cpp(code, collection.data_entry)
 
     status = judge(response=response, expected_output=collection.data_output)
 
@@ -42,8 +28,7 @@ def judge_submission(id: UUID, collection: dict, schema: TypeVar('TSchema'), db:
     db.commit()
 
 
-def run_python(content, data_input):
-    code = base64_decode(content)
+def run_python(code, data_input):
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -60,8 +45,7 @@ def run_python(content, data_input):
             return 'TLE'
 
 
-def run_c(content, data_input):
-    code = base64_decode(content)
+def run_c(code, data_input):
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -78,8 +62,7 @@ def run_c(content, data_input):
             return 'TLE'
 
 
-def run_cpp(content, data_input):
-    code = base64_decode(content)
+def run_cpp(code, data_input):
     with tempfile.NamedTemporaryFile(suffix='.cpp') as tmp:
         tmp.write(code)
         tmp.file.seek(0)

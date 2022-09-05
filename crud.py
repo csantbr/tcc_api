@@ -30,7 +30,7 @@ async def create(db: Session, schema: TSchema):
     return query
 
 
-async def update(db: Session, model: TModel, schema: TSchema, id: Any = None) -> None:
+async def update(db: Session, model: TModel, schema: TSchema, id: Any = None):
     user_model = await get(id=id, db=db, model=model)
 
     query = set_schema_to_model(schema=schema, model=user_model)
@@ -38,8 +38,10 @@ async def update(db: Session, model: TModel, schema: TSchema, id: Any = None) ->
     db.add(query)
     db.commit()
 
+    return query
 
-async def delete(db: Session, model: TModel, id: Any = None) -> None:
+
+async def delete(db: Session, model: TModel, id: Any = None):
     query = db.query(model).filter(model.id == id).first()
 
     if not query:
@@ -47,3 +49,5 @@ async def delete(db: Session, model: TModel, id: Any = None) -> None:
 
     db.query(model).filter(model.id == id).delete()
     db.commit()
+
+    return query
