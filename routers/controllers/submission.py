@@ -1,20 +1,17 @@
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
-from fastapi.exceptions import HTTPException, RequestValidationError
-from pydantic.error_wrappers import ErrorWrapper
-from sqlalchemy import exc
+from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 
 from contrib import exceptions
 from contrib.base64 import decode
-from contrib.exceptions import InvalidBase64
 from contrib.judge import judge_submission
 from crud import create, delete, get, update
 from database.session import Base, engine, get_database
+from models.problem import Problem
 from models.submission import Submission as SubmissionModel
 from schemas.submission import Submission
-from models.problem import Problem
 
 Base.metadata.create_all(bind=engine)
 
@@ -47,11 +44,7 @@ async def create_submission(
 
     code = decode(submission.content)
 
-    try:
-        problem_obj = db.query(Problem).filter(Problem.id == submission.problem_id).first()
-    except:
-        raise NotFoundException
-
+    problem_obj = await get(db=db, model=Problem, id=submission.problem_id)
     submission_obj = await create(db=db, schema=submission)
 
     background_tasks.add_task(
