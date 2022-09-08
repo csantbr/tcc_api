@@ -1,14 +1,14 @@
 from typing import Any
 
-from models.problem import Problem as ProblemModel
-from models.submission import Submission as SubmissionModel
-from schemas.problem import Problem
-from schemas.submission import Submission
+from apps.problem.model import Problem
+from apps.problem.schema import ProblemIn
+from apps.submission.model import Submission
+from apps.submission.schema import SubmissionIn
 
 
 def convert_schema_to_model(schema: Any) -> Any:
-    if isinstance(schema, Problem):
-        model = ProblemModel()
+    if isinstance(schema, ProblemIn):
+        model = Problem()
 
         model.name = schema.name
         model.description = schema.description
@@ -16,8 +16,8 @@ def convert_schema_to_model(schema: Any) -> Any:
         model.data_entry = schema.data_entry
         model.output_description = schema.output_description
         model.data_output = schema.data_output
-    elif isinstance(schema, Submission):
-        model = SubmissionModel()
+    elif isinstance(schema, SubmissionIn):
+        model = Submission()
 
         model.problem_id = schema.problem_id
         model.language_type = schema.language_type
@@ -28,14 +28,14 @@ def convert_schema_to_model(schema: Any) -> Any:
 
 
 def set_schema_to_model(schema: Any, model: Any) -> Any:
-    if isinstance(schema, Problem):
+    if isinstance(schema, ProblemIn):
         model.name = schema.name
         model.description = schema.description
         model.entry_description = schema.entry_description
         model.data_entry = schema.data_entry
         model.output_description = schema.output_description
         model.data_output = schema.data_output
-    elif isinstance(schema, Submission):
+    elif isinstance(schema, SubmissionIn):
         model.problem_id = schema.problem_id
         model.language_type = schema.language_type
         model.content = schema.content
