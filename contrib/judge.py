@@ -1,17 +1,12 @@
-import base64
-import binascii
 import subprocess
 import tempfile
 from difflib import SequenceMatcher
 from typing import TypeVar
 from uuid import UUID
 
-from sqlalchemy import update
 from sqlalchemy.orm import Session
 
-from apps.submission.model import Submission
-from contrib import exceptions
-from converters.schemas import convert_schema_to_model
+from apps.submissions.models import Submission
 
 
 def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('TSchema'), db: Session):

@@ -3,9 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from apps.problem.crud import create, delete, get, update
-from apps.problem.model import Problem
-from apps.problem.schema import ProblemIn
+from apps.problems.crud import create, delete, get, update
+from apps.problems.models import Problem
+from apps.problems.schemas import ProblemIn
 from database.session import Base, engine, get_database
 
 Base.metadata.create_all(bind=engine)

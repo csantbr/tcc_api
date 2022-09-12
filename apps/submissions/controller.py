@@ -1,15 +1,14 @@
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
-from fastapi.exceptions import HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.orm import Session
 
-from apps.problem.model import Problem
-from apps.submission.crud import create, delete, get, update
-from apps.submission.model import Submission
-from apps.submission.schema import SubmissionIn
-from contrib import exceptions
+from apps.problems.models import Problem
+from apps.submissions.crud import create, delete, get, update
+from apps.submissions.models import Submission
+from apps.submissions.schemas import SubmissionIn
 from contrib.base64 import decode
+from contrib.exceptions import InvalidBase64, InvalidLanguageType
 from contrib.judge import judge_submission
 from database.session import Base, engine, get_database
 
@@ -37,10 +36,10 @@ async def create_submission(
     submission: SubmissionIn, background_tasks: BackgroundTasks, db: Session = Depends(get_database)
 ):
     if submission.language_type not in ['py', 'c', 'cpp']:
-        raise exceptions.InvalidLanguageType
+        raise InvalidLanguageType
 
     if not submission.content:
-        raise exceptions.InvalidBase64
+        raise InvalidBase64
 
     code = decode(submission.content)
 

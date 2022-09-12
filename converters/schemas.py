@@ -1,9 +1,9 @@
 from typing import Any
 
-from apps.problem.model import Problem
-from apps.problem.schema import ProblemIn
-from apps.submission.model import Submission
-from apps.submission.schema import SubmissionIn
+from apps.problems.models import Problem
+from apps.problems.schemas import ProblemIn
+from apps.submissions.models import Submission
+from apps.submissions.schemas import SubmissionIn
 
 
 def convert_schema_to_model(schema: Any) -> Any:
