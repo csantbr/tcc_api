@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class Problem(BaseModel):
+class ProblemIn(BaseModel):
     name: str
     description: str
     data_entry: str | None

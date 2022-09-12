@@ -3,10 +3,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from crud import create, delete, get, update
+from apps.problem.crud import create, delete, get, update
+from apps.problem.model import Problem
+from apps.problem.schema import ProblemIn
 from database.session import Base, engine, get_database
-from models.problem import Problem as ProblemModel
-from schemas.problem import Problem
 
 Base.metadata.create_all(bind=engine)
 
@@ -17,7 +17,7 @@ problem_router = APIRouter()
 async def get_problems(
     db: Session = Depends(get_database),
 ):
-    problems = await get(db=db, model=ProblemModel)
+    problems = await get(db=db, model=Problem)
 
     return problems
 
@@ -27,14 +27,14 @@ async def get_problem(
     id: UUID,
     db: Session = Depends(get_database),
 ):
-    problem = await get(id=id, db=db, model=ProblemModel)
+    problem = await get(id=id, db=db, model=Problem)
 
     return problem
 
 
 @problem_router.post('/problems', status_code=status.HTTP_201_CREATED, tags=['problems'])
 async def create_problem(
-    problem: Problem,
+    problem: ProblemIn,
     db: Session = Depends(get_database),
 ):
     await create(db=db, schema=problem)
@@ -47,7 +47,7 @@ async def delete_problem(
     id: UUID,
     db: Session = Depends(get_database),
 ):
-    await delete(id=id, db=db, model=ProblemModel)
+    await delete(id=id, db=db, model=Problem)
 
     return {'status': 'problem deleted'}
 
@@ -55,9 +55,9 @@ async def delete_problem(
 @problem_router.patch('/problems/{id}', status_code=status.HTTP_200_OK, tags=['problems'])
 async def update_problem(
     id: UUID,
-    problem: Problem,
+    problem: ProblemIn,
     db: Session = Depends(get_database),
 ):
-    await update(id=id, db=db, model=ProblemModel, schema=problem)
+    await update(id=id, db=db, model=Problem, schema=problem)
 
     return {'status': 'problem updated'}

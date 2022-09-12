@@ -9,9 +9,9 @@ from uuid import UUID
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
+from apps.submission.model import Submission
 from contrib import exceptions
 from converters.schemas import convert_schema_to_model
-from models.submission import Submission
 
 
 def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('TSchema'), db: Session):

@@ -2,14 +2,13 @@ from typing import Any, List, TypeVar
 
 from sqlalchemy.orm import Session
 
+from apps.problem.model import Problem
+from apps.problem.schema import ProblemIn
 from contrib.exceptions import NotFoundException
 from converters.schemas import convert_schema_to_model, set_schema_to_model
 
-TModel = TypeVar('TModel')
-TSchema = TypeVar('TSchema')
 
-
-async def get(db: Session, model: TModel, id: Any = None) -> List[TModel]:
+async def get(db: Session, model: Problem, id: Any = None) -> List[Problem]:
     if id:
         query = db.query(model).filter(model.id == id).first()
 
@@ -21,7 +20,7 @@ async def get(db: Session, model: TModel, id: Any = None) -> List[TModel]:
     return query
 
 
-async def create(db: Session, schema: TSchema):
+async def create(db: Session, schema: ProblemIn):
     query = convert_schema_to_model(schema=schema)
 
     db.add(query)
@@ -30,7 +29,7 @@ async def create(db: Session, schema: TSchema):
     return query
 
 
-async def update(db: Session, model: TModel, schema: TSchema, id: Any = None):
+async def update(db: Session, model: Problem, schema: ProblemIn, id: Any = None):
     user_model = await get(id=id, db=db, model=model)
 
     query = set_schema_to_model(schema=schema, model=user_model)
@@ -41,7 +40,7 @@ async def update(db: Session, model: TModel, schema: TSchema, id: Any = None):
     return query
 
 
-async def delete(db: Session, model: TModel, id: Any = None):
+async def delete(db: Session, model: Problem, id: Any = None):
     query = db.query(model).filter(model.id == id).first()
 
     if not query:

@@ -2,8 +2,8 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
+from api import router
 from database.session import Base, engine
-from routers.api import router
 
 tags_metadata = [
     {
