@@ -1,10 +1,9 @@
-from typing import Any, List, TypeVar
-
+import sqlalchemy
+from typing import Any, List
 from sqlalchemy.orm import Session
-
 from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn
-from contrib.exceptions import NotFoundException
+from contrib.exceptions import DuplicatedObject, NotFoundException
 from converters.schemas import convert_schema_to_model, set_schema_to_model
 
 
@@ -23,8 +22,11 @@ async def get(db: Session, model: Problem, id: Any = None) -> List[Problem]:
 async def create(db: Session, schema: ProblemIn):
     query = convert_schema_to_model(schema=schema)
 
-    db.add(query)
-    db.commit()
+    try:
+        db.add(query)
+        db.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise DuplicatedObject(message=f'There is already a problem with this name: {schema.name}')
 
     return query
 

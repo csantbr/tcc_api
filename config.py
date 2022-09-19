@@ -11,6 +11,8 @@ class Settings:
     PROJECT_NAME: str = 'Judge'
     PROJECT_VERSION: str = '0.0.1'
 
+    BASE_URL: str = 'http://localhost:8000'
+
     DATABASE_URL: str = os.environ.get('DATABASE_URL')
 
 

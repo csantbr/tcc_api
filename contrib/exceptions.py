@@ -1,6 +1,19 @@
 from fastapi import HTTPException, status
 
 
+class BaseException(Exception):
+    message: str = 'Internal Server Error'
+
+
+class DuplicatedObject(BaseException):
+    message: str = 'Object already exists'
+
+    def __init__(self, *args: object, message: str = None) -> None:
+        super().__init__(*args)
+        if message:
+            self.message = message
+
+
 class UnauthorizedException(HTTPException):
     def __init__(self, detail='authorization has been refused'):
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
