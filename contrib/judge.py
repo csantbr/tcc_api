@@ -83,8 +83,10 @@ def judge(response, expected_output: str):
         return 'TIME LIMIT EXCEEDED'
     elif not response[0].decode():
         return 'COMPILATION ERROR'
-    elif response[0] and (
-        response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n'
+    elif (
+        response[0]
+        and (response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n')
+        and response[0].decode().replace('\n', '') == expected_output.replace('\n', '')
     ):
         return 'PRESENTATION ERROR'
     else:
