@@ -1,6 +1,8 @@
-import sqlalchemy
 from typing import Any, List
+
+import sqlalchemy
 from sqlalchemy.orm import Session
+
 from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn
 from contrib.exceptions import DuplicatedObject, NotFoundException
