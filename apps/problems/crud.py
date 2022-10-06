@@ -34,9 +34,9 @@ async def create(db: Session, schema: ProblemIn):
 
 
 async def update(db: Session, model: Problem, schema: ProblemIn, id: Any = None):
-    user_model = await get(id=id, db=db, model=model)
+    model = await get(id=id, db=db, model=model)
 
-    query = set_schema_to_model(schema=schema, model=user_model)
+    query = set_schema_to_model(schema=schema, model=model)
 
     db.add(query)
     db.commit()
