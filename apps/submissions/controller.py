@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, status
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.orm import Session
 
 from apps.problems.models import Problem
@@ -36,12 +37,17 @@ async def create_submission(
     submission: SubmissionIn, background_tasks: BackgroundTasks, db: Session = Depends(get_database)
 ):
     if submission.language_type not in ['py', 'c', 'cpp']:
-        raise InvalidLanguageType
+        exception = InvalidLanguageType(error_field='language_type')
+        raise RequestValidationError(exception.errors())
 
     if not submission.content:
-        raise InvalidBase64
+        exception = InvalidBase64(error_field='content')
+        raise RequestValidationError(exception.errors())
 
-    code = decode(submission.content)
+    try:
+        code = decode(submission.content)
+    except InvalidBase64 as exc:
+        raise RequestValidationError(exc.errors())
 
     problem_obj = await get(db=db, model=Problem, id=submission.problem_id)
     submission_obj = await create(db=db, schema=submission)

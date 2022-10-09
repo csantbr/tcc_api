@@ -8,6 +8,6 @@ def decode(content):
     try:
         code = base64.b64decode(content)
     except binascii.Error:
-        raise InvalidBase64
+        raise InvalidBase64(error_field='content')
 
     return code

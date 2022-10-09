@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from pydantic.error_wrappers import ErrorWrapper
 
 
 class BaseException(Exception):
@@ -29,11 +30,23 @@ class NotFoundException(HTTPException):
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
 
 
-class InvalidLanguageType(HTTPException):
-    def __init__(self, detail='invalid language type on language type field'):
-        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+class ValidationError(Exception):
+    error_field = ''
+    message = 'Internal server error'
+
+    def errors(self):
+        return [ErrorWrapper(ValueError(self.message), ('body', self.error_field))]
 
 
-class InvalidBase64(HTTPException):
-    def __init__(self, detail='invalid base64 encode on content field'):
-        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+class InvalidLanguageType(ValidationError):
+    def __init__(self, *args: object, error_field: str, message: str = 'Invalid language type') -> None:
+        super().__init__(*args)
+        self.error_field = error_field
+        self.message = message
+
+
+class InvalidBase64(ValidationError):
+    def __init__(self, *args: object, error_field: str, message: str = 'Invalid base64 encode') -> None:
+        super().__init__(*args)
+        self.error_field = error_field
+        self.message = message
