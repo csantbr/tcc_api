@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from apps.problems.examples import problem_complete
+
 
 class ProblemIn(BaseModel):
     name: str
@@ -8,3 +10,6 @@ class ProblemIn(BaseModel):
     entry_description: str
     data_output: str
     output_description: str
+
+    class Config:
+        schema_extra = {'example': problem_complete}
