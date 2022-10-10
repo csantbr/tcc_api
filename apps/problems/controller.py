@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from apps.problems.crud import create, delete, get, update
 from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn
-from contrib.exceptions import DuplicatedObject
+from contrib.exceptions import DuplicateObject
 from database.session import Base, engine, get_database
 
 Base.metadata.create_all(bind=engine)
@@ -40,7 +40,7 @@ async def create_problem(
 ):
     try:
         await create(db=db, schema=problem)
-    except DuplicatedObject:
+    except DuplicateObject:
         # TODO: Return location on headers
         raise HTTPException(status_code=status.HTTP_303_SEE_OTHER)
 

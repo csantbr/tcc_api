@@ -8,8 +8,8 @@ from apps.problems.models import Problem
 from apps.submissions.crud import create, delete, get, update
 from apps.submissions.models import Submission
 from apps.submissions.schemas import SubmissionIn
-from contrib.base64 import decode
-from contrib.exceptions import InvalidBase64, InvalidLanguageType
+from contrib.exceptions import InvalidContent, InvalidLanguageType
+from contrib.helpers import decode, valid
 from contrib.judge import judge_submission
 from database.session import Base, engine, get_database
 
@@ -36,17 +36,14 @@ async def get_submission(id: UUID, db: Session = Depends(get_database)):
 async def create_submission(
     submission: SubmissionIn, background_tasks: BackgroundTasks, db: Session = Depends(get_database)
 ):
-    if submission.language_type not in ['py', 'c', 'cpp']:
-        exception = InvalidLanguageType(error_field='language_type')
-        raise RequestValidationError(exception.errors())
-
-    if not submission.content:
-        exception = InvalidBase64(error_field='content')
-        raise RequestValidationError(exception.errors())
+    try:
+        valid(submission.language_type)
+    except InvalidLanguageType as exc:
+        raise RequestValidationError(exc.errors())
 
     try:
         code = decode(submission.content)
-    except InvalidBase64 as exc:
+    except InvalidContent as exc:
         raise RequestValidationError(exc.errors())
 
     problem_obj = await get(db=db, model=Problem, id=submission.problem_id)

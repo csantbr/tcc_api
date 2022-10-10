@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn
-from contrib.exceptions import DuplicatedObject, NotFoundException
+from contrib.exceptions import DuplicateObject, NotFoundException
 from converters.schemas import convert_schema_to_model, set_schema_to_model
 
 
@@ -28,7 +28,7 @@ async def create(db: Session, schema: ProblemIn):
         db.add(query)
         db.commit()
     except sqlalchemy.exc.IntegrityError:
-        raise DuplicatedObject(message=f'There is already a problem with this name: {schema.name}')
+        raise DuplicateObject(message=f'There is already a problem with this name: {schema.name}')
 
     return query
 
