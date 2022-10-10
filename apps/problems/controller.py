@@ -14,7 +14,7 @@ Base.metadata.create_all(bind=engine)
 problem_router = APIRouter()
 
 
-@problem_router.get('/problems', status_code=status.HTTP_200_OK, tags=['problems'])
+@problem_router.get('/problems', summary='List all problems', status_code=status.HTTP_200_OK, tags=['problems'])
 async def get_problems(
     db: Session = Depends(get_database),
 ):
@@ -23,7 +23,7 @@ async def get_problems(
     return problems
 
 
-@problem_router.get('/problems/{id}', status_code=status.HTTP_200_OK, tags=['problems'])
+@problem_router.get('/problems/{id}', summary='Get a problem by id', status_code=status.HTTP_200_OK, tags=['problems'])
 async def get_problem(
     id: UUID,
     db: Session = Depends(get_database),
@@ -33,7 +33,7 @@ async def get_problem(
     return problem
 
 
-@problem_router.post('/problems', status_code=status.HTTP_201_CREATED, tags=['problems'])
+@problem_router.post('/problems', summary='Create a new problem', status_code=status.HTTP_201_CREATED, tags=['problems'])
 async def create_problem(
     problem: ProblemIn,
     db: Session = Depends(get_database),
@@ -47,7 +47,7 @@ async def create_problem(
     return problem
 
 
-@problem_router.delete('/problems/{id}', status_code=status.HTTP_200_OK, tags=['problems'])
+@problem_router.delete('/problems/{id}', summary='Delete a problem by id', status_code=status.HTTP_200_OK, tags=['problems'])
 async def delete_problem(
     id: UUID,
     db: Session = Depends(get_database),
@@ -57,7 +57,7 @@ async def delete_problem(
     return {'status': 'problem deleted'}
 
 
-@problem_router.patch('/problems/{id}', status_code=status.HTTP_200_OK, tags=['problems'])
+@problem_router.patch('/problems/{id}', summary='Update a problem by id', status_code=status.HTTP_200_OK, tags=['problems'])
 async def update_problem(
     id: UUID,
     problem: ProblemIn,

@@ -18,21 +18,21 @@ Base.metadata.create_all(bind=engine)
 submission_router = APIRouter()
 
 
-@submission_router.get('/submissions', status_code=status.HTTP_200_OK, tags=['submissions'])
+@submission_router.get('/submissions', summary='List all submissions', status_code=status.HTTP_200_OK, tags=['submissions'])
 async def get_submissions(db: Session = Depends(get_database)):
     submissions = await get(db=db, model=Submission)
 
     return submissions
 
 
-@submission_router.get('/submissions/{id}', status_code=status.HTTP_200_OK, tags=['submissions'])
+@submission_router.get('/submissions/{id}', summary='Get a submission by id', status_code=status.HTTP_200_OK, tags=['submissions'])
 async def get_submission(id: UUID, db: Session = Depends(get_database)):
     submission = await get(id=id, db=db, model=Submission)
 
     return submission
 
 
-@submission_router.post('/submissions', status_code=status.HTTP_201_CREATED, tags=['submissions'])
+@submission_router.post('/submissions', summary='Send a new submission', status_code=status.HTTP_201_CREATED, tags=['submissions'])
 async def create_submission(
     submission: SubmissionIn, background_tasks: BackgroundTasks, db: Session = Depends(get_database)
 ):
@@ -61,14 +61,14 @@ async def create_submission(
     return submission
 
 
-@submission_router.delete('/submissions/{id}', status_code=status.HTTP_200_OK, tags=['submissions'])
+@submission_router.delete('/submissions/{id}', summary='Delete a submission by id', status_code=status.HTTP_200_OK, tags=['submissions'])
 async def delete_submission(id: UUID, db: Session = Depends(get_database)):
     await delete(id=id, db=db, model=Submission)
 
     return {'status': 'submission deleted'}
 
 
-@submission_router.patch('/submissions/{id}', status_code=status.HTTP_200_OK, tags=['submissions'])
+@submission_router.patch('/submissions/{id}', summary='Update a submission by id', status_code=status.HTTP_200_OK, tags=['submissions'])
 async def update_submission(id: UUID, submission: SubmissionIn, db: Session = Depends(get_database)):
     await update(id=id, db=db, model=Submission, schema=submission)
 
