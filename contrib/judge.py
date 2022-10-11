@@ -3,6 +3,7 @@ import tempfile
 from difflib import SequenceMatcher
 from typing import TypeVar
 from uuid import UUID
+from config import settings
 
 from sqlalchemy.orm import Session
 
@@ -34,7 +35,7 @@ def run_python(code, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=30)
+            return pipe.communicate(data_input.encode(), timeout=settings.TLE_TIMEOUT)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
@@ -51,7 +52,7 @@ def run_c(code, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=30)
+            return pipe.communicate(data_input.encode(), timeout=settings.TLE_TIMEOUT)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
@@ -68,7 +69,7 @@ def run_cpp(code, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=30)
+            return pipe.communicate(data_input.encode(), timeout=settings.TLE_TIMEOUT)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
