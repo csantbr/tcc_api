@@ -66,10 +66,3 @@ async def delete_submission(id: UUID, db: Session = Depends(get_database)):
     await delete(id=id, db=db, model=Submission)
 
     return {'status': 'submission deleted'}
-
-
-@submission_router.patch('/submissions/{id}', summary='Update a submission by id', status_code=status.HTTP_200_OK, tags=['submissions'])
-async def update_submission(id: UUID, submission: SubmissionIn, db: Session = Depends(get_database)):
-    await update(id=id, db=db, model=Submission, schema=submission)
-
-    return {'status': 'submission updated'}

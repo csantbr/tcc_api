@@ -29,17 +29,6 @@ async def create(db: Session, schema: SubmissionIn):
     return query
 
 
-async def update(db: Session, model: Submission, schema: SubmissionIn, id: Any = None):
-    _model = await get(id=id, db=db, model=model)
-
-    query = set_schema_to_model(schema=schema, model=_model)
-
-    db.add(query)
-    db.commit()
-
-    return query
-
-
 async def delete(db: Session, model: Submission, id: Any = None):
     query = db.query(model).filter(model.id == id).first()
 
