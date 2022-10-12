@@ -1,7 +1,7 @@
 from typing import Any
 
 from apps.problems.models import Problem
-from apps.problems.schemas import ProblemIn
+from apps.problems.schemas import ProblemIn, ProblemOut
 from apps.submissions.models import Submission
 from apps.submissions.schemas import SubmissionIn
 
@@ -42,3 +42,18 @@ def set_schema_to_model(schema: Any, model: Any) -> Any:
         model.status = ''
 
     return model
+
+
+def convert_model_to_schema(model: Any) -> Any:
+    if isinstance(model, Problem):
+        return ProblemOut(
+            id=model.id,
+            name=model.name,
+            description=model.description,
+            data_entry=model.data_entry,
+            entry_description=model.entry_description,
+            data_output=model.data_output,
+            output_description=model.output_description,
+        )
+    elif isinstance(model, Submission):
+        pass

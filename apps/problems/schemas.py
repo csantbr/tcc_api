@@ -1,9 +1,9 @@
-from pydantic import BaseModel
-
+from pydantic import UUID4, BaseModel, Field
+from uuid import uuid4
 from apps.problems.examples import problem_complete
 
 
-class ProblemIn(BaseModel):
+class Problem(BaseModel):
     name: str
     description: str
     data_entry: str | None
@@ -13,3 +13,11 @@ class ProblemIn(BaseModel):
 
     class Config:
         schema_extra = {'example': problem_complete}
+
+
+class ProblemIn(Problem):
+    pass
+
+
+class ProblemOut(Problem):
+    id: UUID4 = Field(default_factory=uuid4)
