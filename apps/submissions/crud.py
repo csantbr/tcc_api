@@ -1,21 +1,25 @@
 from typing import Any, List
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
 from apps.submissions.models import Submission
 from apps.submissions.schemas import SubmissionIn
 from contrib.exceptions import NotFoundException
-from converters.schemas import convert_schema_to_model, set_schema_to_model
+from converters.schemas import convert_schema_to_model
 
 
-async def get(db: Session, model: Submission, id: Any = None) -> List[Submission]:
-    if id:
-        query = db.query(model).filter(model.id == id).first()
+async def get(db: Session, id: UUID, model: Submission) -> Submission:
+    query = db.query(model).filter(model.id == id).first()
 
-        if not query:
-            raise NotFoundException
-    else:
-        query = db.query(model).all()
+    if not query:
+        raise NotFoundException
+
+    return query
+
+
+async def get_all(db: Session, model: Submission) -> List[Submission]:
+    query = db.query(model).all()
 
     return query
 

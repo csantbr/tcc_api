@@ -6,8 +6,8 @@ class BaseException(Exception):
     message: str = 'Internal server error'
 
 
-class DuplicateObject(BaseException):
-    message: str = 'Object already exists'
+class ConflictObject(BaseException):
+    message: str = 'Object in conflict, you cannot delete this object because it violates foreign key constraint'
 
     def __init__(self, *args: object, message: str = None) -> None:
         super().__init__(*args)
@@ -15,14 +15,13 @@ class DuplicateObject(BaseException):
             self.message = message
 
 
-class UnauthorizedException(HTTPException):
-    def __init__(self, detail='Authorization has been refused'):
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+class DuplicateObject(BaseException):
+    message: str = 'Object already exists'
 
-
-class ForbiddenException(HTTPException):
-    def __init__(self, detail='Access not allowed'):
-        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+    def __init__(self, *args: object, message: str = None) -> None:
+        super().__init__(*args)
+        if message:
+            self.message = message
 
 
 class NotFoundException(HTTPException):

@@ -3,11 +3,11 @@ import tempfile
 from difflib import SequenceMatcher
 from typing import TypeVar
 from uuid import UUID
-from config import settings
 
 from sqlalchemy.orm import Session
 
 from apps.submissions.models import Submission
+from config import settings
 
 
 def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('TSchema'), db: Session):
