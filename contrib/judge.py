@@ -5,7 +5,7 @@ from typing import TypeVar
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-
+from contrib.helpers import decode
 from apps.submissions.models import Submission
 from config import settings
 
@@ -25,6 +25,7 @@ def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('T
 
 
 def run_python(code, data_input):
+    data_entry = decode(data_input)
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -35,13 +36,14 @@ def run_python(code, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=settings.TLE_TIMEOUT)
+            return pipe.communicate(data_entry, timeout=settings.TLE_TIMEOUT)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
 
 
 def run_c(code, data_input):
+    data_entry = decode(data_input)
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -52,13 +54,14 @@ def run_c(code, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=settings.TLE_TIMEOUT)
+            return pipe.communicate(data_entry, timeout=settings.TLE_TIMEOUT)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'
 
 
 def run_cpp(code, data_input):
+    data_entry = decode(data_input)
     with tempfile.NamedTemporaryFile(suffix='.cpp') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -69,7 +72,7 @@ def run_cpp(code, data_input):
             shell=True,
         )
         try:
-            return pipe.communicate(data_input.encode(), timeout=settings.TLE_TIMEOUT)
+            return pipe.communicate(data_entry, timeout=settings.TLE_TIMEOUT)
         except subprocess.TimeoutExpired:
             pipe.kill()
             return 'TLE'

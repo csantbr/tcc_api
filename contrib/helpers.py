@@ -9,13 +9,13 @@ def valid(language):
         raise InvalidLanguageType(field='language_type')
 
 
-def decode(content):
+def decode(content, error_field = 'content'):
     if not content:
-        raise InvalidContent(field='content')
+        raise InvalidContent(field=error_field)
 
     try:
         code = base64.b64decode(content)
     except binascii.Error:
-        raise InvalidContent(field='content')
+        raise InvalidContent(field=error_field)
 
     return code

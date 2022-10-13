@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -9,7 +10,8 @@ from apps.problems.crud import create, delete, get, get_all, update
 from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn, ProblemOut
 from contrib import responses
-from contrib.exceptions import ConflictObject, DuplicateObject
+from contrib.exceptions import ConflictObject, DuplicateObject, InvalidContent
+from contrib.helpers import decode
 from converters.schemas import convert_model_to_schema
 from database.session import Base, engine, get_database
 
@@ -75,6 +77,11 @@ async def create_problem(
     problem: ProblemIn,
     db: Session = Depends(get_database),
 ) -> ProblemOut:
+    try:
+        decode(content=problem.data_entry, error_field='data entry')
+    except InvalidContent as exc:
+        raise RequestValidationError(exc.errors())
+
     try:
         problem_obj = await create(db=db, schema=problem)
     except DuplicateObject:
