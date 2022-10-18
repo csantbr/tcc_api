@@ -6,11 +6,7 @@ from sqlalchemy.orm import Session
 
 from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn
-from contrib.exceptions import (
-    ConflictObject, 
-    DuplicateObject,
-    NotFoundException,
-)
+from contrib.exceptions import ConflictObject, DuplicateObject, NotFoundException
 from converters.schemas import convert_schema_to_model, set_schema_to_model
 
 

@@ -11,3 +11,6 @@ lint:
 
 sort:
 	isort .
+
+test:
+	@poetry run pytest
