@@ -14,3 +14,6 @@ sort:
 
 test:
 	@poetry run pytest
+
+coverage:
+	@poetry run pytest --cov=./tests/
