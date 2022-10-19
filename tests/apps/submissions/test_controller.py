@@ -3,8 +3,9 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from fastapi import FastAPI
 from ast import literal_eval
+
+from fastapi import FastAPI
 
 from apps.submissions.examples import submission_in_complete
 

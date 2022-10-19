@@ -83,6 +83,11 @@ async def create_problem(
         raise RequestValidationError(exc.errors())
 
     try:
+        decode(content=problem.data_output, error_field='data output')
+    except InvalidContent as exc:
+        raise RequestValidationError(exc.errors())
+
+    try:
         problem_obj = await create(db=db, schema=problem)
     except DuplicateObject:
         # TODO: Return location on headers

@@ -19,7 +19,8 @@ def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('T
     elif schema.language_type == 'cpp':
         response = run_cpp(code, collection.data_entry)
 
-    status = judge(response=response, expected_output=collection.data_output)
+    expected_output = decode(collection.data_output).decode('unicode_escape')
+    status = judge(response=response, expected_output=expected_output)
 
     db.query(Submission).filter(Submission.id == id).update({'status': status})
     db.commit()
