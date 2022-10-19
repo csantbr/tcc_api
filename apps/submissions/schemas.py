@@ -3,10 +3,8 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel as Model
 from pydantic import Field
 
-from apps.submissions.examples import (
-    submission_in_complete,
-    submission_out_complete,
-)
+from apps.submissions.examples import (submission_in_complete,
+                                       submission_out_complete)
 
 
 class Submission(Model):

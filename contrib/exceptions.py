@@ -45,9 +45,7 @@ class InvalidLanguageType(ValidationError):
 
 
 class InvalidContent(ValidationError):
-    def __init__(
-        self, *args: object, field: str, message: str = None
-    ) -> None:
+    def __init__(self, *args: object, field: str, message: str = None) -> None:
         super().__init__(*args)
         self.field = field
         self.message = f'Invalid {self.field}, the {self.field} must be a valid base64.'

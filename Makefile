@@ -11,3 +11,9 @@ lint:
 
 sort:
 	isort .
+
+test:
+	@poetry run pytest
+
+coverage:
+	@poetry run pytest --cov=./tests/

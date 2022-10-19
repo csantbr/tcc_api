@@ -9,7 +9,7 @@ def valid(language):
         raise InvalidLanguageType(field='language_type')
 
 
-def decode(content, error_field = 'content'):
+def decode(content, error_field='content'):
     if not content:
         raise InvalidContent(field=error_field)
 

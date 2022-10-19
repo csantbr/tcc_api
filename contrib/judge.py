@@ -5,9 +5,10 @@ from typing import TypeVar
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-from contrib.helpers import decode
+
 from apps.submissions.models import Submission
 from config import settings
+from contrib.helpers import decode
 
 
 def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('TSchema'), db: Session):
