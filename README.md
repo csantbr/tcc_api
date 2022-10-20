@@ -1,17 +1,22 @@
-# Initial setup
+# Judge API
 
-Install poetry
+## Setup
 
-`pip install poetry`
+The first step is install poetry and then install the project dependencies
 
-Install dependencies
+```shell
+$ pip install poetry
+$ make setup
+```
 
-`make setup`
+After installing poetry and the dependencies, you need to start docker.
 
-Starting docker
+```shell
+$ docker-compose up -d
+```
 
-`docker-compose up -d`
+After this, run the project.
 
-Run the project
-
-`make run`
+```shell
+$ make run
+```
