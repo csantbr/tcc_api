@@ -85,8 +85,8 @@ def get_ratio(expected_response, response):
 
 
 def judge(response, expected_output: str):
-    print(f"Resultado: {response[0].decode()}, Expected: {expected_output}")
-    print(f"Igual: {response[0].decode() == expected_output})
+    print(f'Resultado: {response[0].decode()}, Expected: {expected_output}')
+    print(f'Igual: {response[0].decode() == expected_output}')
 
     if response == 'TLE':
         return 'TIME LIMIT EXCEEDED'

@@ -118,7 +118,7 @@ async def delete_problem(id: UUID, db: Session = Depends(get_database)) -> None:
     return JSONResponse(content={}, status_code=status.HTTP_204_NO_CONTENT)
 
 
-@problem_router.patch(
+@problem_router.put(
     '/problems/{id}',
     summary='Update a problem by id',
     status_code=status.HTTP_200_OK,

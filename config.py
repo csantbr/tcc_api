@@ -15,7 +15,7 @@ class Settings:
 
     DATABASE_URL: str = os.environ.get('DATABASE_URL')
 
-    BEARER_KEY: str = '@MARATONA_2022'
+    BEARER_KEY: str = 'M2022'
 
     TLE_TIMEOUT: int = 30
 

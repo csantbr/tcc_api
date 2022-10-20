@@ -9,9 +9,6 @@ run:
 lint:
 	blue .
 
-sort:
-	isort .
-
 test:
 	@poetry run pytest
 
