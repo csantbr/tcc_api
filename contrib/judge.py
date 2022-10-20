@@ -85,21 +85,24 @@ def get_ratio(expected_response, response):
 
 
 def judge(response, expected_output: str):
+    print(f"Resultado: {response[0].decode()}, Expected: {expected_output}")
+    print(f"Igual: {response[0].decode() == expected_output})
+
     if response == 'TLE':
         return 'TIME LIMIT EXCEEDED'
     elif not response[0].decode():
         return 'COMPILATION ERROR'
-    elif (
-        response[0]
-        and (response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n')
-        and response[0].decode().replace('\n', '') == expected_output.replace('\n', '')
-    ):
-        return 'PRESENTATION ERROR'
     else:
         response = response[0].decode()
         ratio = get_ratio(expected_output.replace('\n', ''), response.replace('\n', ''))
         if ratio == 0:
             return 'ACCEPTED'
+        elif (
+            response[0]
+            and (response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n')
+            and response[0].decode().replace('\n', '') == expected_output.replace('\n', '')
+        ):
+            return 'PRESENTATION ERROR'
         else:
             count = (ratio - (ratio % 5)) or 5
             return f'WRONG ANSWER: {count:.0f}%'
