@@ -10,6 +10,8 @@ from apps.submissions.models import Submission
 from config import settings
 from contrib.helpers import decode
 
+from loguru import logger
+
 
 def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('TSchema'), db: Session):
     if schema.language_type == 'py':
@@ -21,6 +23,7 @@ def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('T
 
     expected_output = decode(collection.data_output).decode('unicode_escape')
     status = judge(response=response, expected_output=expected_output)
+    logger.info(status)
 
     db.query(Submission).filter(Submission.id == id).update({'status': status})
     db.commit()
@@ -85,9 +88,6 @@ def get_ratio(expected_response, response):
 
 
 def judge(response, expected_output: str):
-    print(f'Resultado: {response[0].decode()}, Expected: {expected_output}')
-    print(f'Igual: {response[0].decode() == expected_output}')
-
     if response == 'TLE':
         return 'TIME LIMIT EXCEEDED'
     elif not response[0].decode():
