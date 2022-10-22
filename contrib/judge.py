@@ -93,8 +93,7 @@ def judge(response, expected_output: str):
     elif not response[0].decode():
         return 'COMPILATION ERROR'
     else:
-        response = response[0].decode()
-        ratio = get_ratio(expected_output.replace('\n', ''), response.replace('\n', ''))
+        ratio = get_ratio(expected_output.replace('\n', ''), response[0].decode().replace('\n', ''))
         if ratio == 0:
             return 'ACCEPTED'
         elif (
