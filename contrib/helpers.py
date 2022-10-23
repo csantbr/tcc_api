@@ -9,7 +9,7 @@ def valid(language):
         raise InvalidLanguageType(field='language_type')
 
 
-def decode(content, error_field='content'):
+def base64_decode(content, error_field='content'):
     try:
         code = base64.b64decode(content)
     except binascii.Error:

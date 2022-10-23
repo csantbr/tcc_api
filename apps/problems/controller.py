@@ -11,7 +11,7 @@ from apps.problems.models import Problem
 from apps.problems.schemas import ProblemIn, ProblemOut
 from contrib import responses
 from contrib.exceptions import ConflictObject, DuplicateObject, InvalidContent
-from contrib.helpers import decode
+from contrib.helpers import base64_decode
 from converters.schemas import convert_model_to_schema
 from database.session import Base, engine, get_database
 
@@ -78,12 +78,12 @@ async def create_problem(
     db: Session = Depends(get_database),
 ) -> ProblemOut:
     try:
-        decode(content=problem.data_entry, error_field='data entry')
+        base64_decode(content=problem.data_entry, error_field='data entry')
     except InvalidContent as exc:
         raise RequestValidationError(exc.errors())
 
     try:
-        decode(content=problem.data_output, error_field='data output')
+        base64_decode(content=problem.data_output, error_field='data output')
     except InvalidContent as exc:
         raise RequestValidationError(exc.errors())
 

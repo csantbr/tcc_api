@@ -12,7 +12,7 @@ from apps.submissions.models import Submission
 from apps.submissions.schemas import SubmissionIn, SubmissionOut
 from contrib import responses
 from contrib.exceptions import InvalidContent, InvalidLanguageType
-from contrib.helpers import decode, valid
+from contrib.helpers import base64_decode, valid
 from contrib.judge import judge_submission
 from converters.schemas import convert_model_to_schema
 from database.session import Base, engine, get_database
@@ -84,7 +84,7 @@ async def create_submission(
         raise RequestValidationError(exc.errors())
 
     try:
-        code = decode(submission_in.content)
+        code = base64_decode(submission_in.content)
     except InvalidContent as exc:
         raise RequestValidationError(exc.errors())
 

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from apps.submissions.models import Submission
 from config import settings
-from contrib.helpers import decode
+from contrib.helpers import base64_decode
 
 from loguru import logger
 
@@ -21,7 +21,7 @@ def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('T
     elif schema.language_type == 'cpp':
         response = run_cpp(code, collection.data_entry)
 
-    expected_output = decode(collection.data_output).decode('unicode_escape')
+    expected_output = base64_decode(collection.data_output).decode('unicode_escape')
     status = judge(response=response, expected_output=expected_output)
     logger.info(status)
 
@@ -30,7 +30,7 @@ def judge_submission(id: UUID, collection: dict, code: bytes, schema: TypeVar('T
 
 
 def run_python(code, data_input):
-    data_entry = decode(data_input)
+    data_entry = base64_decode(data_input)
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -48,7 +48,7 @@ def run_python(code, data_input):
 
 
 def run_c(code, data_input):
-    data_entry = decode(data_input)
+    data_entry = base64_decode(data_input)
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
@@ -66,7 +66,7 @@ def run_c(code, data_input):
 
 
 def run_cpp(code, data_input):
-    data_entry = decode(data_input)
+    data_entry = base64_decode(data_input)
     with tempfile.NamedTemporaryFile(suffix='.cpp') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
