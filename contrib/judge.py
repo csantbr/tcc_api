@@ -52,7 +52,6 @@ def run_c(code, data_input):
     with tempfile.NamedTemporaryFile(suffix='.c') as tmp:
         tmp.write(code)
         tmp.file.seek(0)
-        print(f"DENTRO DO RUN: {code}")
         pipe = subprocess.Popen(
             f'gcc -lm -o {tmp.name}_ {tmp.name} && {tmp.name}_ && rm {tmp.name}_',
             stdin=subprocess.PIPE,
