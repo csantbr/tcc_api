@@ -1,6 +1,5 @@
 import subprocess
 import tempfile
-from difflib import SequenceMatcher
 from typing import TypeVar
 from uuid import UUID
 
@@ -83,25 +82,18 @@ def run_cpp(code, data_input):
             return 'TLE'
 
 
-def get_ratio(expected_response, response):
-    return 100 - SequenceMatcher(None, expected_response, response).ratio() * 100
-
-
 def judge(response, expected_output: str):
     if response == 'TLE':
         return 'TIME LIMIT EXCEEDED'
     elif not response[0].decode():
         return 'COMPILATION ERROR'
+    elif expected_output.replace('\n', '') == response[0].decode().replace('\n', ''):
+        return 'ACCEPTED'
+    elif (
+        response[0]
+        and (response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n')
+        and response[0].decode().replace('\n', '') == expected_output.replace('\n', '')
+    ):
+        return 'PRESENTATION ERROR'
     else:
-        ratio = get_ratio(expected_output.replace('\n', ''), response[0].decode().replace('\n', ''))
-        if ratio == 0:
-            return 'ACCEPTED'
-        elif (
-            response[0]
-            and (response[0].decode().count('\n') != expected_output.count('\n') or response[0].decode()[-1] != '\n')
-            and response[0].decode().replace('\n', '') == expected_output.replace('\n', '')
-        ):
-            return 'PRESENTATION ERROR'
-        else:
-            count = (ratio - (ratio % 5)) or 5
-            return f'WRONG ANSWER: {count:.0f}%'
+        return 'WRONG ANSWER'
