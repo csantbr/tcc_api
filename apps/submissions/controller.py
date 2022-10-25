@@ -83,11 +83,14 @@ async def create_submission(
     except InvalidLanguageType as exc:
         raise RequestValidationError(exc.errors())
 
+    print(f"ANTES DO ENCONDE: {submission_in.content}")
+
     try:
         code = base64_decode(submission_in.content)
     except InvalidContent as exc:
         raise RequestValidationError(exc.errors())
 
+    print(f"DEPOIS DO ENCONDE: {code}")
     submission_obj = await create(db=db, schema=submission_in)
 
     background_tasks.add_task(
