@@ -52,7 +52,7 @@ def run_c(code, data_input):
         tmp.write(code)
         tmp.file.seek(0)
         pipe = subprocess.Popen(
-            f'gcc -lm -o {tmp.name}_ {tmp.name} && {tmp.name}_ && rm {tmp.name}_',
+            f'gcc -o {tmp.name}_ {tmp.name} -lm && {tmp.name}_ && rm {tmp.name}_',
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             shell=True,
@@ -70,7 +70,7 @@ def run_cpp(code, data_input):
         tmp.write(code)
         tmp.file.seek(0)
         pipe = subprocess.Popen(
-            f'g++ -lm -o {tmp.name}_ {tmp.name} && {tmp.name}_ && rm {tmp.name}_',
+            f'g++ -o {tmp.name}_ {tmp.name} -lm && {tmp.name}_ && rm {tmp.name}_',
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             shell=True,
