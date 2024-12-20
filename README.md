@@ -2,14 +2,14 @@
 
 ## Setup
 
-The first step is install poetry and then install the project dependencies
+The first step is install uv and then install the project dependencies
 
 ```shell
-$ pip install poetry
+$ pip install uv
 $ make setup
 ```
 
-After installing poetry and the dependencies, you need to start docker.
+After installing uv and the dependencies, you need to start docker.
 
 ```shell
 $ docker-compose up -d

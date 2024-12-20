@@ -1,16 +1,13 @@
 VERSION := 0.1.0
 
 setup:
-	poetry install
+	uv install
 
 run:
-	hypercorn main:app --reload
+	@hypercorn judge.main:app --reload
+
+run-migrations:
+	@mongodb-migrate --url 'mongodb://127.0.0.1:27017/judge?replicaSet=rs0' --migrations migrations --database judge
 
 lint:
 	blue .
-
-test:
-	@poetry run pytest
-
-coverage:
-	@poetry run pytest --cov=./tests/

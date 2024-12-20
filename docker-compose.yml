@@ -1,10 +1,15 @@
-version: "3"
 services:
-  db:
-    image: postgres:11-alpine
-    environment:
-      POSTGRES_USER: judge
-      POSTGRES_PASSWORD: judge
-      POSTGRES_DB: judge
+  mongodb:
+    hostname: mongodb
+    container_name: mongodb
+    image: mongo:5
+    expose:
+      - 27017
     ports:
-      - "5432:5432"
+      - 27017:27017
+    restart: always
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:\"rs0\",version:1,members:[{_id:0,host:\"localhost:27017\"}]}).ok || rs.slaveOk().ok || rs.status().ok" | mongo --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
