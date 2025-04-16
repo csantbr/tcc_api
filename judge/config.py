@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     TLE_TIMEOUT: int = Field(default=30)
 
+    RABBITMQ_URL: str = Field(default='amqp://guest:guest@localhost:5672/')
+
     model_config = SettingsConfigDict(
         env_file=str(Path(__file__).parents[1] / '.env'),
         env_file_encoding='utf-8',

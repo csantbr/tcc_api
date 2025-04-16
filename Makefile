@@ -1,7 +1,7 @@
 VERSION := 0.1.0
 
 setup:
-	uv install
+	poetry install
 
 run:
 	@hypercorn judge.main:app --reload
@@ -11,3 +11,6 @@ run-migrations:
 
 lint:
 	blue .
+
+run-worker:
+	@poetry run python -m judge.worker

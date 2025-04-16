@@ -1,7 +1,8 @@
 import uuid
+import logging
 from datetime import datetime, timezone
 
-from fastapi import Depends, BackgroundTasks
+from fastapi import Depends
 from pydantic import UUID4
 
 from judge.contrib.constants import SUPPORTED_LANGUAGES
@@ -11,11 +12,14 @@ from judge.problems.repositories import ProblemRepository
 from judge.contrib.exceptions import ObjectNotFound, ValidationError
 from judge.contrib.base64 import Base64Utils
 from judge.contrib.judge import Judge
+from judge.contrib.rabbitmq import RabbitMQ
 from judge.submissions.schemas import (
     SubmissionCollectionResponse,
     SubmissionIn,
     SubmissionOut,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class SubmissionUseCase:
@@ -27,8 +31,9 @@ class SubmissionUseCase:
         self.repository = repository
         self.problem_repository = problem_repository
         self.judge = Judge(repository=repository)
+        self.rabbitmq = RabbitMQ()
 
-    async def create(self, submission_in: SubmissionIn, background_tasks: BackgroundTasks) -> SubmissionOut:
+    async def create(self, submission_in: SubmissionIn) -> SubmissionOut:
         problem = await self.problem_repository.get(
             filter={'id': submission_in.problem_id}
         )
@@ -59,7 +64,13 @@ class SubmissionUseCase:
                 model=submission_model, session=transaction.session
             )
 
-        background_tasks.add_task(self.judge.process_submission, submission=submission_out, data=problem)
+        submission_dict = submission_out.model_dump()
+        logger.info(f"Sending submission to queue: {submission_dict}")
+
+        await self.rabbitmq.publish({
+            'submission': submission_dict,
+            'problem': problem
+        })
 
         return submission_out
 
