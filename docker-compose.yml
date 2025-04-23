@@ -14,6 +14,16 @@ services:
       start_period: 30s
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
 
+  redis:
+    hostname: redis
+    container_name: redis
+    image: redis:7
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+    restart: always
+
   judge:
     build:
       context: .
@@ -22,9 +32,15 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - MONGODB_URL=mongodb://mongodb:27017/judge?replicaSet=rs0
       - MONGODB_DATABASE=judge
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_QUEUE=submissions
       - TLE_TIMEOUT=30
       - MEMORY_LIMIT=512
     ports:
@@ -44,3 +60,55 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.judge
+    container_name: worker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/judge?replicaSet=rs0
+      - MONGODB_DATABASE=judge
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_QUEUE=submissions
+      - TLE_TIMEOUT=30
+      - MEMORY_LIMIT=512
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    command: python -m judge.worker
+
+  rq-dashboard:
+    image: eoranged/rq-dashboard:latest
+    container_name: rq-dashboard
+    depends_on:
+      redis:
+        condition: service_started
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0
+    ports:
+      - "9181:9181"
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

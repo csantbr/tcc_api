@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, timezone
+import asyncio
 
-from fastapi import Depends, BackgroundTasks
+from fastapi import Depends
 from pydantic import UUID4
 
 from judge.contrib.constants import SUPPORTED_LANGUAGES
@@ -11,11 +12,26 @@ from judge.problems.repositories import ProblemRepository
 from judge.contrib.exceptions import ObjectNotFound, ValidationError
 from judge.contrib.base64 import Base64Utils
 from judge.contrib.judge import Judge
+from judge.contrib.queue import queue_manager
 from judge.submissions.schemas import (
     SubmissionCollectionResponse,
     SubmissionIn,
     SubmissionOut,
 )
+
+
+def sync_process_submission(submission_data: dict, problem_data: dict):
+    """Synchronous wrapper for the async process_submission function."""
+    from judge.submissions.repositories import SubmissionRepository
+    from judge.contrib.repository.mongodb import db
+
+    async def process():
+        repository = SubmissionRepository(db.client)
+        judge = Judge(repository=repository)
+        submission = SubmissionOut(**submission_data)
+        await judge.process_submission(submission, problem_data)
+
+    asyncio.run(process())
 
 
 class SubmissionUseCase:
@@ -28,7 +44,7 @@ class SubmissionUseCase:
         self.problem_repository = problem_repository
         self.judge = Judge(repository=repository)
 
-    async def create(self, submission_in: SubmissionIn, background_tasks: BackgroundTasks) -> SubmissionOut:
+    async def create(self, submission_in: SubmissionIn) -> SubmissionOut:
         problem = await self.problem_repository.get(
             filter={'id': submission_in.problem_id}
         )
@@ -59,7 +75,11 @@ class SubmissionUseCase:
                 model=submission_model, session=transaction.session
             )
 
-        background_tasks.add_task(self.judge.process_submission, submission=submission_out, data=problem)
+        queue_manager.enqueue(
+            sync_process_submission,
+            submission_data=submission_out.model_dump(),
+            problem_data=problem
+        )
 
         return submission_out
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, status, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Body, Depends, status, HTTPException
 from pydantic import UUID4
 from judge.contrib.documentation import (
     ConflictErrorResponse,
@@ -31,12 +31,11 @@ router = APIRouter(tags=['submissions'], prefix='/v0/submissions')
     },
 )
 async def post(
-    background_tasks: BackgroundTasks,
     use_case: SubmissionUseCase = Depends(),
     submission_in: SubmissionIn = Body(...),
 ) -> SubmissionOut:
     try:
-        submission = await use_case.create(submission_in=submission_in, background_tasks=background_tasks)
+        submission = await use_case.create(submission_in=submission_in)
     except ObjectNotFound:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

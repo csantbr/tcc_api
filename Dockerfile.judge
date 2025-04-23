@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash judge
@@ -12,7 +13,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip install --no-cache-dir -e .
+RUN curl -sSL https://install.python-poetry.org | python3 - && \
+    /root/.local/bin/poetry config virtualenvs.create false && \
+    /root/.local/bin/poetry install --no-interaction --no-ansi
 
 ENV PYTHONUNBUFFERED=1
 ENV TLE_TIMEOUT=30

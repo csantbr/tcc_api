@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     MONGODB_URL: str
     MONGODB_DATABASE: str = Field(default='judge')
 
+    REDIS_HOST: str = Field(default='localhost')
+    REDIS_PORT: int = Field(default=6379)
+    REDIS_DB: int = Field(default=0)
+    REDIS_QUEUE: str = Field(default='submissions')
+
     TLE_TIMEOUT: int = Field(default=30)
     MEMORY_LIMIT: int = Field(default=512)
 
