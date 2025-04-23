@@ -1,7 +1,7 @@
 VERSION := 0.1.0
 
 setup:
-	uv install
+	poetry install
 
 run:
 	@hypercorn judge.main:app --reload
