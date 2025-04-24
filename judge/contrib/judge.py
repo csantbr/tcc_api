@@ -58,6 +58,10 @@ class Judge:
             'py': PythonRunner(),
             'c': CRunner(),
             'cpp': CppRunner(),
+            'java': JavaRunner(),
+            'php': PHPRunner(),
+            'js': JavaScriptRunner(),
+            'go': GoRunner(),
         }
         return runners.get(language_type)
 
@@ -257,3 +261,27 @@ class CppRunner(CodeRunner):
     def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Run C++ code."""
         return self._execute("g++ -o {0}_exec {0} -lm && {0}_exec && rm {0}_exec", code, data_input, settings.TLE_TIMEOUT)
+
+
+class JavaRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run Java code."""
+        return self._execute("javac {0} && java -cp $(dirname {0}) $(basename {0} .java)", code, data_input, settings.TLE_TIMEOUT)
+
+
+class PHPRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run PHP code."""
+        return self._execute("php {0}", code, data_input, settings.TLE_TIMEOUT)
+
+
+class JavaScriptRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run JavaScript code using Node.js."""
+        return self._execute("node {0}", code, data_input, settings.TLE_TIMEOUT)
+
+
+class GoRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run Go code."""
+        return self._execute("go run {0}", code, data_input, settings.TLE_TIMEOUT)
