@@ -8,6 +8,9 @@ class Migration(BaseMigration):
         return self.db['problems']
 
     def upgrade(self):
+        if 'users' not in self.db.list_collection_names():
+            self.db.create_collection('users')
+
         if 'problems' not in self.db.list_collection_names():
             self.db.create_collection('problems')
 
@@ -23,6 +26,7 @@ class Migration(BaseMigration):
         )
 
     def downgrade(self):
+        self.db.drop_collection('users')
         self.db.drop_collection('problems')
         self.problems.drop_index('ix_name_1_created_at_1')
         self.db.drop_collection('submissions')
