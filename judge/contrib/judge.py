@@ -71,9 +71,9 @@ class Judge:
 
     def _parse_test_cases(self, data: dict) -> List[Dict[str, str]]:
         """Parse test cases from the data."""
-        if isinstance(data.get('data_entry'), list) and isinstance(data.get('data_output'), list):
-            return [{'input': inp, 'output': out} for inp, out in zip(data['data_entry'], data['data_output'])]
-        return [{'input': data.get('data_entry', ''), 'output': data.get('data_output', '')}]
+        if isinstance(data.get('data_entries'), list) and isinstance(data.get('data_outputs'), list):
+            return [{'input': inp, 'output': out} for inp, out in zip(data['data_entries'], data['data_outputs'])]
+        return [{'input': data.get('data_entries', [''])[0], 'output': data.get('data_outputs', [''])[0]}]
 
     def _is_code_safe(self, code: str) -> bool:
         """

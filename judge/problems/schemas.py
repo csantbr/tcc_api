@@ -1,4 +1,5 @@
 from pydantic import Field
+from typing import List
 
 from judge.contrib.collection_response import CollectionResponse
 from judge.contrib.schemas import Model, OutMixin
@@ -12,9 +13,9 @@ from judge.problems.examples import (
 class Problem(Model):
     name: str = Field(title='Problem name')
     description: str = Field(title='Problem description')
-    data_entry: str | None = Field(title='Problem data entry')
+    data_entries: List[str] = Field(title='Problem data entries', default_factory=list)
     entry_description: str = Field(title='Problem entry description')
-    data_output: str = Field(title='Problem data output')
+    data_outputs: List[str] = Field(title='Problem data outputs', default_factory=list)
     output_description: str = Field(title='Problem output description')
 
 
