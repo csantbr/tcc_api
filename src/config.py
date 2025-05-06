@@ -18,7 +18,6 @@ class Settings(BaseSettings):
     REDIS_QUEUE: str = Field(default='submissions')
 
     TLE_TIMEOUT: int = Field(default=30)
-    MEMORY_LIMIT: int = Field(default=512)
 
     IGNORE_TRAILING_WHITESPACE: bool = Field(default=True)
     IGNORE_EMPTY_LINES: bool = Field(default=True)

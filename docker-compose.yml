@@ -42,7 +42,6 @@ services:
       - REDIS_DB=0
       - REDIS_QUEUE=submissions
       - TLE_TIMEOUT=30
-      - MEMORY_LIMIT=512
     ports:
       - "8000:8000"
     restart: always
@@ -79,7 +78,6 @@ services:
       - REDIS_DB=0
       - REDIS_QUEUE=submissions
       - TLE_TIMEOUT=30
-      - MEMORY_LIMIT=512
     restart: unless-stopped
     deploy:
       resources:

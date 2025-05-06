@@ -20,7 +20,6 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
 
 ENV PYTHONUNBUFFERED=1
 ENV TLE_TIMEOUT=30
-ENV MEMORY_LIMIT=512
 
 RUN chown -R judge:judge /app
 
