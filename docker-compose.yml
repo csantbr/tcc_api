@@ -95,7 +95,7 @@ services:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
-    command: python -m judge.worker
+    command: python -m src.worker
 
   rq-dashboard:
     image: eoranged/rq-dashboard:latest

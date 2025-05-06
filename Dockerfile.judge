@@ -13,9 +13,10 @@ WORKDIR /app
 
 COPY . .
 
+ENV PATH="/root/.local/bin:$PATH"
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    /root/.local/bin/poetry config virtualenvs.create false && \
-    /root/.local/bin/poetry install --no-interaction --no-ansi
+    poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi
 
 ENV PYTHONUNBUFFERED=1
 ENV TLE_TIMEOUT=30
@@ -25,4 +26,4 @@ RUN chown -R judge:judge /app
 
 USER judge
 
-CMD ["python", "-m", "judge.main"]
+CMD ["python", "-m", "src.main"]

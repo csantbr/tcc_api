@@ -4,6 +4,10 @@ version = "0.1.0"
 description = "Judge API"
 authors = ["Caio Santoro <csantbr@gmail.com>"]
 readme = "README.md"
+packages = [
+    { include = "src" },
+    { include = "migrations" }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12"
@@ -18,9 +22,6 @@ pymongo = "4.6.3"
 python-dotenv = ">=1.0.1"
 redis = ">=5.0.1"
 rq = ">=1.15.1"
-
-[tool.setuptools]
-packages = ["judge", "migrations"]
 
 [build-system]
 requires = ["poetry-core"]
