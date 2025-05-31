@@ -178,6 +178,9 @@ class Judge:
         if error:
             if "MemoryError" in error.decode() or "out of memory" in error.decode():
                 return STATUS_MEMORY_LIMIT_EXCEEDED
+            
+            print("Runtime Error:\t" + error.decode())
+            
             return STATUS_RUNTIME_ERROR
 
         if not output:
@@ -215,34 +218,42 @@ class CodeRunner:
         """Run the code with the given input. To be implemented by subclasses."""
         raise NotImplementedError("Subclasses must implement 'run' method")
 
-    def _execute(self, command_template: str, code: bytes, data_input: str, timeout: int) -> Tuple[Optional[bytes], Optional[bytes]]:
+    def _execute(self, command_template: str, code: bytes, data_input: str, timeout: int, file_suffix: str = "") -> Tuple[Optional[bytes], Optional[bytes]]:
         """
         Execute the given command with the provided code and input, returning the output or timeout status.
         """
         data_entry = Base64Utils.decode(data_input)
 
-        with tempfile.NamedTemporaryFile() as tmp_file:
+        with tempfile.NamedTemporaryFile(suffix=file_suffix, delete=False) as tmp_file:
             tmp_file.write(code if isinstance(code, bytes) else code.encode('utf-8'))
             tmp_file.flush()
-            command = command_template.format(tmp_file.name)
+            tmp_file_name = tmp_file.name
 
-            process = subprocess.Popen(
-                command,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                shell=True,
-            )
+        command = command_template.format(tmp_file_name, tmp_file_name.rsplit('.', 1)[0])
 
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+
+        try:
+            output, error = process.communicate(data_entry, timeout=timeout)
+            return output, error
+
+        except subprocess.TimeoutExpired:
+            process.kill()
+            return "TLE", None
+        except Exception as e:
+            return None, str(e).encode()
+        finally:
             try:
-                output, error = process.communicate(data_entry, timeout=timeout)
-                return output, error
-
-            except subprocess.TimeoutExpired:
-                process.kill()
-                return "TLE", None
-            except Exception as e:
-                return None, str(e).encode()
+                import os
+                os.remove(tmp_file_name)
+            except Exception:
+                pass
 
 
 class PythonRunner(CodeRunner):
@@ -254,7 +265,14 @@ class PythonRunner(CodeRunner):
 class CRunner(CodeRunner):
     def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Run C code."""
-        return self._execute("gcc -o {0}_exec {0} -lm && {0}_exec && rm {0}_exec", code, data_input, settings.TLE_TIMEOUT)
+        # {0} = source file, {1} = binary file (without extension)
+        return self._execute(
+            "gcc -o {1}_exec {0} -lm && {1}_exec && rm {1}_exec",
+            code,
+            data_input,
+            settings.TLE_TIMEOUT,
+            file_suffix=".c"
+        )
 
 
 class CppRunner(CodeRunner):
