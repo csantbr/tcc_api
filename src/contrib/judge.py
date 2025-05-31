@@ -278,7 +278,13 @@ class CRunner(CodeRunner):
 class CppRunner(CodeRunner):
     def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Run C++ code."""
-        return self._execute("g++ -o {0}_exec {0} -lm && {0}_exec && rm {0}_exec", code, data_input, settings.TLE_TIMEOUT)
+        return self._execute(
+            "g++ -o {1}_exec {0} -lm && {1}_exec && rm {1}_exec", 
+            code,
+            data_input,
+            settings.TLE_TIMEOUT,
+            file_suffix=".cpp"
+        )
 
 
 class JavaRunner(CodeRunner):
