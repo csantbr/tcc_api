@@ -1,6 +1,6 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic.networks import AnyHttpUrl
 
 
@@ -22,9 +22,10 @@ class Settings(BaseSettings):
     IGNORE_TRAILING_WHITESPACE: bool = Field(default=True)
     IGNORE_EMPTY_LINES: bool = Field(default=True)
     CASE_SENSITIVE: bool = Field(default=True)
-
+    API_KEY_MASTER: SecretStr = Field(env='API_KEY_MASTER')
+    
     model_config = SettingsConfigDict(
-        env_file=str(Path(__file__).parents[1] / '.env'),
+        env_file=str(Path(__file__).parents[1] / 'local.env'),
         env_file_encoding='utf-8',
     )
 
