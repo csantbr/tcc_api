@@ -62,6 +62,7 @@ class Judge:
             'php': PHPRunner(),
             'js': JavaScriptRunner(),
             'go': GoRunner(),
+            'csharp': CSharpRunner(),
         }
         return runners.get(language_type)
 
@@ -187,7 +188,8 @@ class Judge:
             return STATUS_COMPILATION_ERROR
 
         output_decoded = output.decode()
-
+        print(f"Output:\t{output_decoded}")
+        
         if settings.IGNORE_TRAILING_WHITESPACE:
             output_decoded = '\n'.join(line.rstrip() for line in output_decoded.splitlines())
             expected_output = '\n'.join(line.rstrip() for line in expected_output.splitlines())
@@ -250,7 +252,6 @@ class CodeRunner:
             return None, str(e).encode()
         finally:
             try:
-                import os
                 os.remove(tmp_file_name)
             except Exception:
                 pass
@@ -339,3 +340,41 @@ class GoRunner(CodeRunner):
     def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Run Go code."""
         return self._execute("go run {0}", code, data_input, settings.TLE_TIMEOUT, file_suffix=".go")
+    
+class CSharpRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run C# code. Detecta se é script (dotnet-script) ou programa tradicional (dotnet run)."""
+        code_str = code.decode() if isinstance(code, bytes) else code
+        # Detecta se é um programa tradicional com static void Main
+        if re.search(r'static\s+void\s+Main', code_str):
+            # Programa tradicional: cria projeto temporário
+            
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                proj_dir = os.path.join(tmp_dir, "App")
+                os.makedirs(proj_dir)
+                # Cria projeto
+                subprocess.run(["dotnet", "new", "console", "--output", proj_dir, "--use-program-main"], check=True)
+                # Sobrescreve Program.cs
+                code_path = os.path.join(proj_dir, "Program.cs")
+                with open(code_path, "w") as f:
+                    f.write(code_str)
+                # Roda o projeto
+                command = f"dotnet run --nologo --property:NoWarn=CS* --property:WarningsAsErrors=false --project {proj_dir}"
+                process = subprocess.Popen(
+                    command,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
+                )
+                data_entry = Base64Utils.decode(data_input)
+                try:
+                    output, error = process.communicate(data_entry, timeout=settings.TLE_TIMEOUT)
+                    return output, error
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    return "TLE", None
+                except Exception as e:
+                    return None, str(e).encode()
+        else:
+            return self._execute("dotnet-script {0} --no-logo 2>&1 | grep -v 'warning CS'", code, data_input, settings.TLE_TIMEOUT, file_suffix='.cs')
