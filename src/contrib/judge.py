@@ -59,9 +59,9 @@ class Judge:
             'c': CRunner(),
             'cpp': CppRunner(),
             'java': JavaRunner(),
-            # 'php': PHPRunner(),
-            # 'js': JavaScriptRunner(),
-            # 'go': GoRunner(),
+            'php': PHPRunner(),
+            'js': JavaScriptRunner(),
+            'go': GoRunner(),
         }
         return runners.get(language_type)
 
@@ -316,3 +316,26 @@ class JavaRunner(CodeRunner):
                 return "TLE", None
             except Exception as e:
                 return None, str(e).encode()
+            
+            
+class PHPRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run PHP code."""
+        return self._execute("php {0}", 
+                             code, 
+                             data_input, 
+                             settings.TLE_TIMEOUT, 
+                             file_suffix=".php"
+        )
+
+
+class JavaScriptRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run JavaScript code using Node.js."""
+        return self._execute("node {0}", code, data_input, settings.TLE_TIMEOUT, file_suffix=".js")
+
+
+class GoRunner(CodeRunner):
+    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
+        """Run Go code."""
+        return self._execute("go run {0}", code, data_input, settings.TLE_TIMEOUT, file_suffix=".go")
