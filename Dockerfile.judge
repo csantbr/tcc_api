@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     openjdk-17-jdk \
     php \
+    nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash judge
