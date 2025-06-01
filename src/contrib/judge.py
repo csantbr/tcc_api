@@ -1,9 +1,9 @@
+import os
 import subprocess
 import tempfile
 import re
 from uuid import UUID
 from typing import List, Tuple, Dict, Optional
-
 from src.submissions.repositories import SubmissionRepository
 from src.submissions.schemas import SubmissionOut
 from src.config import settings
@@ -59,9 +59,9 @@ class Judge:
             'c': CRunner(),
             'cpp': CppRunner(),
             'java': JavaRunner(),
-            'php': PHPRunner(),
-            'js': JavaScriptRunner(),
-            'go': GoRunner(),
+            # 'php': PHPRunner(),
+            # 'js': JavaScriptRunner(),
+            # 'go': GoRunner(),
         }
         return runners.get(language_type)
 
@@ -290,22 +290,29 @@ class CppRunner(CodeRunner):
 class JavaRunner(CodeRunner):
     def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
         """Run Java code."""
-        return self._execute("javac {0} && java -cp $(dirname {0}) $(basename {0} .java)", code, data_input, settings.TLE_TIMEOUT)
+        code_str = code.decode() if isinstance(code, bytes) else code
+        match = re.search(r'public\s+class\s+([A-Za-z_][A-Za-z0-9_]*)', code_str)
+        class_name = match.group(1) if match else "Main"
+        file_name = f"{class_name}.java"
 
-
-class PHPRunner(CodeRunner):
-    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
-        """Run PHP code."""
-        return self._execute("php {0}", code, data_input, settings.TLE_TIMEOUT)
-
-
-class JavaScriptRunner(CodeRunner):
-    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
-        """Run JavaScript code using Node.js."""
-        return self._execute("node {0}", code, data_input, settings.TLE_TIMEOUT)
-
-
-class GoRunner(CodeRunner):
-    def run(self, code: bytes, data_input: str) -> Tuple[Optional[bytes], Optional[bytes]]:
-        """Run Go code."""
-        return self._execute("go run {0}", code, data_input, settings.TLE_TIMEOUT)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            file_path = os.path.join(tmp_dir, file_name)
+            with open(file_path, "w") as f:
+                f.write(code_str)
+            command = f"javac {file_path} && java -cp {tmp_dir} {class_name}"
+            process = subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+            )
+            data_entry = Base64Utils.decode(data_input)
+            try:
+                output, error = process.communicate(data_entry, timeout=settings.TLE_TIMEOUT)
+                return output, error
+            except subprocess.TimeoutExpired:
+                process.kill()
+                return "TLE", None
+            except Exception as e:
+                return None, str(e).encode()
