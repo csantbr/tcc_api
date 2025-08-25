@@ -32,3 +32,12 @@ class ProblemOut(Problem, OutMixin):
 class ProblemCollectionResponse(CollectionResponse):
     class Config:
         json_schema_extra = {'example': problem_collection_response_example}
+
+
+class ProblemUpdate(Model):
+    name: str | None = Field(title='Problem name', default=None)
+    description: str | None = Field(title='Problem description', default=None)
+    data_entries: List[str] | None = Field(title='Problem data entries', default=None)
+    entry_description: str | None = Field(title='Problem entry description', default=None)
+    data_outputs: List[str] | None = Field(title='Problem data outputs', default=None)
+    output_description: str | None = Field(title='Problem output description', default=None)

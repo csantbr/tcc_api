@@ -53,3 +53,4 @@ class Model(BaseModel):
 class OutMixin(BaseModel):
     id: UUID4 = Field(default='', title='Identifier id')
     created_at: UTCDatetime = Field(title='Creation date')
+    updated_at: UTCDatetime | None = Field(default=None, title='Update date')
