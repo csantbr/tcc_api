@@ -1,4 +1,4 @@
-from pydantic import Field
+from pydantic import Field, ConfigDict
 
 from src.contrib.collection_response import CollectionResponse
 from src.contrib.schemas import Model, OutMixin
@@ -24,15 +24,12 @@ class User(Model):
 
 
 class UserIn(User):
-    class Config:
-        json_schema_extra = {'example': user_in_example}
+    model_config = ConfigDict(json_schema_extra={'example': user_in_example})
 
 
 class UserOut(User, OutMixin):
-    class Config:
-        json_schema_extra = {'example': user_out_example}
+    model_config = ConfigDict(json_schema_extra={'example': user_out_example})
 
 
 class UserCollectionResponse(CollectionResponse):
-    class Config:
-        json_schema_extra = {'example': user_collection_response_example}
+    model_config = ConfigDict(json_schema_extra={'example': user_collection_response_example})

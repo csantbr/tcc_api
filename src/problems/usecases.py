@@ -11,6 +11,7 @@ from src.problems.schemas import (
     ProblemCollectionResponse,
     ProblemIn,
     ProblemOut,
+    ProblemUpdate,
 )
 
 
@@ -51,3 +52,22 @@ class ProblemUseCase:
         problems = await self.repository.query()
 
         return ProblemCollectionResponse.create(results=problems)
+
+    async def update(self, id: UUID4, problem_in: ProblemUpdate) -> ProblemOut:
+        problem = await self.get(id=id)
+
+        problem_updated = problem.model_copy(
+            update=problem_in.model_dump(exclude_unset=True)
+        )
+        problem_updated.updated_at = datetime.now(timezone.utc)
+
+        problem_model = ProblemModel(**problem_updated.model_dump())
+
+        async with await self.repository.start_transaction() as transaction:
+            await self.repository.update(
+                data=problem_model.model_dump(),
+                filter={'id': id},
+                session=transaction.session,
+            )
+
+        return problem_updated

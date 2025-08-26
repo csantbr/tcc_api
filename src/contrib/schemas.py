@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from bson import ObjectId
-from pydantic import UUID4, BaseModel, Field, GetCoreSchemaHandler
+from pydantic import UUID4, BaseModel, Field, GetCoreSchemaHandler, ConfigDict
 from pydantic_core import core_schema
 
 
@@ -42,14 +42,16 @@ class UTCDatetime(datetime):
 
 
 class Model(BaseModel):
-    class Config:
-        extra = 'forbid'
-        from_attributes = True
-        arbitrary_types_allowed = True
-        populate_by_name = True
-        json_encoders = {ObjectId: str}
+    model_config = ConfigDict(
+        extra='forbid',
+        from_attributes=True,
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+        json_encoders={ObjectId: str},
+    )
 
 
 class OutMixin(BaseModel):
     id: UUID4 = Field(default='', title='Identifier id')
     created_at: UTCDatetime = Field(title='Creation date')
+    updated_at: UTCDatetime | None = Field(default=None, title='Update date')

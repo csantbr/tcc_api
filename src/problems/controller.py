@@ -10,6 +10,7 @@ from src.problems.schemas import (
     ProblemCollectionResponse,
     ProblemIn,
     ProblemOut,
+    ProblemUpdate,
 )
 from src.problems.usecases import ProblemUseCase
 from src.contrib.exceptions import ObjectNotFound
@@ -56,6 +57,30 @@ async def get(
 ) -> ProblemOut:
     try:
         problem = await use_case.get(id=id)
+    except ObjectNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return problem
+
+
+@router.put(
+    '/{id}',
+    summary='Update a Problem by id',
+    status_code=status.HTTP_200_OK,
+    response_model=ProblemOut,
+    responses={
+        200: {'model': ProblemOut},
+        404: {'model': NotFoundErrorResponse},
+        500: {'model': InternalServerErrorResponse},
+    },
+)
+async def put(
+    id: UUID4,
+    use_case: ProblemUseCase = Depends(),
+    problem_in: ProblemUpdate = Body(...),
+) -> ProblemOut:
+    try:
+        problem = await use_case.update(id=id, problem_in=problem_in)
     except ObjectNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from uuid import UUID
 
@@ -23,15 +23,12 @@ class SubmissionIn(BaseModel):
     language_type: str = Field(title='Language type')
     content: str = Field(title='Code')
 
-    class Config:
-        json_schema_extra = {'example': submission_in_example}
+    model_config = ConfigDict(json_schema_extra={'example': submission_in_example})
 
 
 class SubmissionOut(Submission, OutMixin):
-    class Config:
-        json_schema_extra = {'example': submission_out_example}
+    model_config = ConfigDict(json_schema_extra={'example': submission_out_example})
 
 
 class SubmissionCollectionResponse(CollectionResponse):
-    class Config:
-        json_schema_extra = {'example': submission_collection_response_example}
+    model_config = ConfigDict(json_schema_extra={'example': submission_collection_response_example})
