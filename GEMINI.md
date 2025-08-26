@@ -1,65 +1,65 @@
-# Gemini Code Assistant Context
+# Contexto do Gemini Code Assistant
 
-## Project Overview
+## Visão Geral do Projeto
 
-This project is a Python-based backend API for a programming contest judging system. It allows users to submit solutions to programming problems, which are then evaluated by a dedicated "judge" service.
+Este projeto é uma API de backend baseada em Python para um sistema de julgamento de competições de programação. Ele permite que os usuários enviem soluções para problemas de programação, que são então avaliadas por um serviço de "juiz" dedicado.
 
-**Key Technologies:**
+**Tecnologias Principais:**
 
-*   **Backend:** Python with the FastAPI framework.
-*   **Database:** MongoDB for storing data related to users, problems, and submissions.
-*   **Task Queue:** Celery with a Redis broker to manage the asynchronous judging of submissions.
-*   **Containerization:** Docker and Docker Compose are used to orchestrate the different services (API, worker, judge, and database).
-*   **Dependency Management:** Poetry is used for managing Python dependencies.
+*   **Backend:** Python com o framework FastAPI.
+*   **Banco de Dados:** MongoDB para armazenar dados relacionados a usuários, problemas e submissões.
+*   **Fila de Tarefas:** Celery com um broker Redis para gerenciar o julgamento assíncrono de submissões.
+*   **Conteinerização:** Docker e Docker Compose são usados para orquestrar os diferentes serviços (API, worker, juiz e banco de dados).
+*   **Gerenciamento de Dependências:** Poetry é usado para gerenciar as dependências do Python.
 
-**Architecture:**
+**Arquitetura:**
 
-The system is composed of four main services:
+O sistema é composto por quatro serviços principais:
 
-*   `api`: The main FastAPI application that exposes the RESTful API endpoints.
-*   `worker`: A Celery worker that consumes submission tasks from the Redis queue.
-*   `judge`: A dedicated service that executes the submitted code in a sandboxed environment and evaluates the output. This service is built from `Dockerfile.judge` and includes runtimes for various programming languages.
-*   `mongo`: A MongoDB instance for data persistence.
+*   `api`: A aplicação FastAPI principal que expõe os endpoints da API RESTful.
+*   `worker`: Um worker Celery que consome tarefas de submissão da fila Redis.
+*   `judge`: Um serviço dedicado que executa o código enviado em um ambiente sandbox e avalia a saída. Este serviço é construído a partir do `Dockerfile.judge` e inclui runtimes para várias linguagens de programação.
+*   `mongo`: Uma instância do MongoDB para persistência de dados.
 
-## Building and Running
+## Compilando e Executando
 
-### Initial Setup
+### Configuração Inicial
 
-1.  **Create and activate a virtual environment:**
+1.  **Crie e ative um ambiente virtual:**
     ```bash
     python3 -m venv venv
     source venv/bin/activate
     ```
 
-2.  **Install dependencies using Poetry:**
+2.  **Instale as dependências usando o Poetry:**
     ```bash
     pip install poetry
     poetry install
     ```
 
-### Running the Application
+### Executando a Aplicação
 
-*   **Start all services with Docker Compose:**
+*   **Inicie todos os serviços com o Docker Compose:**
     ```bash
     docker-compose up -d --build
     ```
-    The API will be available at `http://127.0.0.1:8000/docs#/`.
+    A API estará disponível em `http://127.0.0.1:8000/docs#/`.
 
-### Testing and Linting
+### Testes e Linting
 
-*   **Run the linter:**
+*   **Execute o linter:**
     ```bash
-    make lint
+    poetry run ruff check .
     ```
-    This project uses `ruff` for linting.
+    Este projeto usa `ruff` para linting.
 
-*   **Stress Testing:**
-    The `k6_testing` directory contains a basic stress test setup using k6.
+*   **Teste de Estresse:**
+    O diretório `k6_testing` contém uma configuração básica de teste de estresse usando k6.
 
-## Development Conventions
+## Convenções de Desenvolvimento
 
-*   **Code Style:** The project uses `ruff` for linting and formatting. The `Makefile` provides a `lint` command to enforce the style.
-*   **Configuration:** Application configuration is managed using `pydantic-settings` and is loaded from a `local.env` file. The main configuration is in `src/config.py`.
-*   **Modularity:** The application is well-structured, with clear separation of concerns. Routers are defined in `src/routers.py` and are dynamically loaded by the main application in `src/app.py`. Each feature (e.g., `users`, `problems`, `submissions`) has its own dedicated module with controllers, models, and repositories.
-*   **Typing:** The codebase uses Python type hints extensively.
-*   **Authentication:** The API uses a JWT token for authentication. The `README.md` file provides instructions on how to generate a token for testing purposes. The master API key is defined in the `.env` file.
+*   **Estilo de Código:** O projeto usa `ruff` para linting e formatação. O `Makefile` fornece um comando `lint` para impor o estilo.
+*   **Configuração:** A configuração da aplicação é gerenciada usando `pydantic-settings` e é carregada de um arquivo `local.env`. A configuração principal está em `src/config.py`.
+*   **Modularidade:** A aplicação é bem estruturada, com uma clara separação de responsabilidades. Os roteadores são definidos em `src/routers.py` e são carregados dinamicamente pela aplicação principal em `src/app.py`. Cada recurso (por exemplo, `users`, `problems`, `submissions`) tem seu próprio módulo dedicado com controladores, modelos e repositórios.
+*   **Tipagem:** O código usa extensivamente as dicas de tipo do Python.
+*   **Autenticação:** A API usa um token JWT para autenticação. O arquivo `README.md` fornece instruções sobre como gerar um token para fins de teste. A chave de API mestre é definida no arquivo `.env`.

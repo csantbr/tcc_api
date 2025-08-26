@@ -29,15 +29,15 @@ pip install poetry
 poetry install
 ```
 
-## Testing
+## Testes
 
-To run the tests, you will need to have the application running. You can start the application using Docker Compose:
+Para rodar os testes, você precisa ter a aplicação rodando. Você pode iniciar a aplicação usando o Docker Compose:
 
 ```bash
 docker-compose up -d --build
 ```
 
-Once the application is running, you can run the tests using `pytest`:
+Com a aplicação rodando, você pode executar os testes usando `pytest`:
 
 ```bash
 poetry run pytest
