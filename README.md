@@ -29,17 +29,21 @@ pip install poetry
 poetry install
 ```
 
-## Após isso, inicialize os serviços do docker:
+## Testing
 
-```
+To run the tests, you will need to have the application running. You can start the application using Docker Compose:
+
+```bash
 docker-compose up -d --build
 ```
 
-## Acesse:
+Once the application is running, you can run the tests using `pytest`:
 
-```text
-http://127.0.0.1:8000/docs#/
+```bash
+poetry run pytest
 ```
+
+
 
 ## Para gerar o token de autenticação:
 

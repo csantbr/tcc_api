@@ -25,15 +25,3 @@ def gerar_token():
     }
     token = jwt.encode(payload, settings.API_KEY_MASTER.get_secret_value(), algorithm=AUTH_ALGORITHM)
     return token
-
-
-
-async def validar_jwt(credentials: HTTPAuthorizationCredentials = Security(security)):
-    try:
-        payload = jwt.decode(credentials.credentials, settings.API_KEY_MASTER.get_secret_value(), algorithms=[AUTH_ALGORITHM])
-        if payload[TOKEN_PAYLOAD] != SUB_AUTHORIZE:
-            raise HTTPException(status_code=403, detail="Token inválido")
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expirado")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=403, detail="Token inválido")
